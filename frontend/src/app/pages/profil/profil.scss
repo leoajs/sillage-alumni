@@ -1,0 +1,71 @@
+.profil {
+  max-width: 640px;
+  overflow: hidden;
+  padding: 0;
+}
+
+.profil-bandeau {
+  height: 90px;
+  background: linear-gradient(120deg, #c9d3ff, #e3d6ff 55%, #d3f0f2);
+}
+
+.profil-contenu {
+  position: relative;
+  margin-top: -42px;
+  padding: 0 24px 24px;
+
+  h2 {
+    margin: 12px 0 16px;
+    font-size: 1.25rem;
+  }
+}
+
+.profil-entete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px 16px;
+
+  .bouton {
+    position: relative;
+    top: 10px;
+    white-space: normal;
+  }
+}
+
+.poste-actuel {
+  margin: 6px 0 0;
+  color: var(--texte-doux);
+  overflow-wrap: anywhere;
+}
+
+.informations {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--bordure);
+
+  dt {
+    color: var(--texte-doux);
+    font-size: 0.85rem;
+  }
+
+  dd {
+    margin: 4px 0 0;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 640px) {
+  .profil-entete .bouton {
+    top: 0;
+  }
+
+  .informations {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,116 @@
+.section-parcours {
+  max-width: 640px;
+  margin-top: 20px;
+}
+
+.section-parcours-entete,
+.frise-entete {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.parcours-vide,
+.formulaire-parcours {
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--fond);
+}
+
+.formulaire-parcours {
+  margin-bottom: 20px;
+
+  h3 {
+    margin: 0 0 14px;
+    font-size: 1rem;
+  }
+
+  fieldset {
+    display: grid;
+    gap: 14px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  input,
+  select,
+  textarea {
+    background: var(--carte);
+  }
+
+  .aide-parcours {
+    color: var(--texte-doux);
+  }
+
+  .message-erreur {
+    margin: 0;
+  }
+
+  .actions-formulaire {
+    flex-wrap: wrap;
+  }
+}
+
+.ajout-confirme {
+  margin: 0 0 14px;
+  color: var(--vert);
+  font-size: 0.9rem;
+}
+
+.frise {
+  margin: 0 0 0 6px;
+  padding: 0;
+  list-style: none;
+}
+
+.frise-element {
+  position: relative;
+  padding: 0 0 18px 18px;
+  border-left: 1px solid var(--violet-fond);
+  overflow-wrap: anywhere;
+
+  &::before {
+    position: absolute;
+    top: 7px;
+    left: -5px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--violet);
+    content: '';
+  }
+
+  &:last-child {
+    padding-bottom: 0;
+    border-color: transparent;
+  }
+}
+
+.frise-entete {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px 16px;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+  }
+}
+
+.frise-dates {
+  color: var(--texte-doux);
+  font-size: 0.85rem;
+}
+
+.frise-sous-titre,
+.frise-commentaire {
+  margin: 4px 0 0;
+  color: var(--texte-doux);
+  font-size: 0.9rem;
+}
+
+.frise-commentaire {
+  margin-top: 8px;
+  white-space: pre-line;
+}

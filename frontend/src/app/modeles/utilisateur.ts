@@ -21,9 +21,8 @@ export interface NouvelUtilisateur {
   ville: string | null;
 }
 
-// GET /api/users/{id}/experiences
-export interface Experience {
-  id: number;
+// POST /api/users/{id}/experiences
+export interface NouvelleExperience {
   entreprise: string;
   poste: string;
   anneeDebut: number;
@@ -31,15 +30,21 @@ export interface Experience {
   commentaire: string | null;
 }
 
-// GET /api/users/{id}/formations
-export interface Formation {
+export interface Experience extends NouvelleExperience {
   id: number;
+}
+
+export interface NouvelleFormation {
   etablissementId: number;
-  etablissementNom: string;
   parcoursId: number | null;
-  parcoursCode: string | null;
-  parcoursIntitule: string | null;
   anneeDebut: number;
   anneeFin: number | null;
   commentaire: string | null;
+}
+
+export interface Formation extends NouvelleFormation {
+  id: number;
+  etablissementNom: string;
+  parcoursCode: string | null;
+  parcoursIntitule: string | null;
 }

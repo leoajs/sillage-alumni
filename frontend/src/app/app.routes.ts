@@ -10,6 +10,7 @@ import { ForumDetail } from './pages/forum-detail/forum-detail';
 import { ForumNouveau } from './pages/forum-nouveau/forum-nouveau';
 import { Forum } from './pages/forum/forum';
 import { Inscription } from './pages/inscription/inscription';
+import { Profil } from './pages/profil/profil';
 import { TableauDeBord } from './pages/tableau-de-bord/tableau-de-bord';
 
 export const routes: Routes = [
@@ -28,6 +29,7 @@ export const routes: Routes = [
       { path: 'evenements', component: Evenements, data: { titre: 'Espace événements' } },
       { path: 'evenements/nouveau', component: EvenementNouveau, data: { titre: 'Créer un événement' } },
       { path: 'annuaire', component: Annuaire, data: { titre: 'Annuaire des alumni' } },
+      { path: 'profil', component: Profil, data: { titre: 'Mon profil' } },
       { path: 'forum', component: Forum, data: { titre: 'Forum & discussions' } },
       { path: 'forum/nouveau', component: ForumNouveau, data: { titre: 'Nouveau post' } },
       { path: 'forum/:id', component: ForumDetail, data: { titre: 'Discussion' } },

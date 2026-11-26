@@ -1,4 +1,4 @@
-<button class="declencheur" type="button" (click)="basculer()" aria-label="Mon compte">
+<button class="declencheur" type="button" (click)="basculer()" aria-label="Mon compte" [attr.aria-expanded]="ouvert()">
   <app-avatar [initiales]="mesInitiales()" [teinte]="maTeinte()" taille="petit" />
 </button>
 
@@ -8,6 +8,7 @@
     <p class="nom">{{ utilisateur()?.prenom }} {{ utilisateur()?.nom }}</p>
     <p class="detail">{{ utilisateur()?.email }}</p>
     <span class="badge teinte-gris">{{ libelleRole() }}</span>
+    <a class="bouton bouton-doux lien-profil" routerLink="/profil" (click)="basculer()">Mon profil</a>
     <button class="bouton bouton-discret deconnexion" type="button" (click)="deconnecter()">Se déconnecter</button>
   </div>
 }

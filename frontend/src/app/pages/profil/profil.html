@@ -1,0 +1,153 @@
+@if (profil(); as utilisateur) {
+  <section class="carte profil">
+    <div class="profil-bandeau"></div>
+    <div class="profil-contenu">
+      <div class="profil-entete">
+        <app-avatar
+          [initiales]="initiales(utilisateur.prenom, utilisateur.nom)"
+          [teinte]="teinteAvatar(utilisateur.id)"
+          taille="grand"
+          aria-hidden="true"
+        />
+        <a class="bouton bouton-doux" routerLink="/annuaire" [queryParams]="{ membre: utilisateur.id }">
+          Voir ma fiche dans l’annuaire
+        </a>
+      </div>
+      @if (posteActuel(); as poste) {
+        <p class="poste-actuel">{{ poste.poste }} chez {{ poste.entreprise }}</p>
+      }
+      <h2>Informations personnelles</h2>
+      <dl class="informations">
+        <div>
+          <dt>Prénom</dt>
+          <dd>{{ utilisateur.prenom }}</dd>
+        </div>
+        <div>
+          <dt>Nom</dt>
+          <dd>{{ utilisateur.nom }}</dd>
+        </div>
+        <div>
+          <dt>Ville</dt>
+          <dd>{{ utilisateur.ville || 'Non renseignée' }}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="carte section-parcours" aria-labelledby="titre-experiences">
+    <header class="bloc-entete section-parcours-entete">
+      <h2 id="titre-experiences">Expériences professionnelles</h2>
+      @if (!chargementExperiences() && !erreurExperiences() && !formulaireOuvert()) {
+        <button class="bouton bouton-doux" type="button" (click)="ouvrirFormulaire()">
+          <span aria-hidden="true">+</span> Ajouter une expérience
+        </button>
+      }
+    </header>
+
+    @if (chargementExperiences()) {
+      <p class="etat-vide" role="status">Chargement de tes expériences…</p>
+    } @else if (erreurExperiences()) {
+      <p class="message-erreur" role="alert">Impossible de charger tes expériences.</p>
+      <button class="bouton bouton-discret" type="button" (click)="chargerExperiences(utilisateur.id)">
+        Réessayer
+      </button>
+    } @else {
+      @if (formulaireOuvert()) {
+        <form class="formulaire-parcours" [formGroup]="formulaire" (ngSubmit)="ajouterExperience()">
+          <h3>Nouvelle expérience</h3>
+          <fieldset [disabled]="envoiEnCours()" aria-label="Informations sur l’expérience">
+            <div class="ligne-champs">
+              <label class="champ">
+                <span>Poste</span>
+                <input type="text" formControlName="poste" maxlength="150" required />
+                @if (champInvalide('poste')) {
+                  <small class="erreur-champ">Indique le nom du poste.</small>
+                }
+              </label>
+              <label class="champ">
+                <span>Entreprise</span>
+                <input type="text" formControlName="entreprise" maxlength="150" required />
+                @if (champInvalide('entreprise')) {
+                  <small class="erreur-champ">Indique le nom de l’entreprise.</small>
+                }
+              </label>
+            </div>
+            <div class="ligne-champs">
+              <label class="champ">
+                <span>Année de début</span>
+                <input type="number" inputmode="numeric" formControlName="anneeDebut" required />
+                @if (champInvalide('anneeDebut')) {
+                  <small class="erreur-champ">Saisis une année sur quatre chiffres.</small>
+                }
+              </label>
+              <label class="champ">
+                <span>Année de fin <em>(facultative)</em></span>
+                <input
+                  type="number"
+                  inputmode="numeric"
+                  formControlName="anneeFin"
+                  aria-describedby="aide-annee-fin"
+                />
+                <small id="aide-annee-fin" class="aide-parcours">Laisse vide si tu occupes toujours ce poste.</small>
+                @if (champInvalide('anneeFin')) {
+                  <small class="erreur-champ">Saisis une année sur quatre chiffres.</small>
+                }
+              </label>
+            </div>
+            <label class="champ">
+              <span>Commentaire <em>(facultatif)</em></span>
+              <textarea formControlName="commentaire" rows="3" placeholder="Tes missions, ton équipe…"></textarea>
+            </label>
+            @if (erreurAjout()) {
+              <p class="message-erreur" role="alert">{{ erreurAjout() }}</p>
+            }
+            <div class="actions-formulaire">
+              <button class="bouton bouton-discret" type="button" (click)="fermerFormulaire()">Annuler</button>
+              <button class="bouton bouton-plein" type="submit">
+                {{ envoiEnCours() ? 'Enregistrement…' : 'Enregistrer' }}
+              </button>
+            </div>
+          </fieldset>
+        </form>
+      }
+
+      @if (experienceAjoutee()) {
+        <p class="ajout-confirme" role="status">Expérience ajoutée.</p>
+      }
+
+      @if (experiences().length) {
+        <ol class="frise" role="list">
+          @for (experience of experiencesTriees(); track experience.id) {
+            <li class="frise-element">
+              <div class="frise-entete">
+                <div>
+                  <h3>{{ experience.poste }}</h3>
+                  <p class="frise-sous-titre">{{ experience.entreprise }}</p>
+                </div>
+                <span class="frise-dates">
+                  @if (experience.anneeFin === null) {
+                    Depuis {{ experience.anneeDebut }}
+                  } @else if (experience.anneeDebut === experience.anneeFin) {
+                    {{ experience.anneeDebut }}
+                  } @else {
+                    {{ experience.anneeDebut }} – {{ experience.anneeFin }}
+                  }
+                </span>
+              </div>
+              @if (experience.commentaire) {
+                <p class="frise-commentaire">{{ experience.commentaire }}</p>
+              }
+            </li>
+          }
+        </ol>
+      } @else if (!formulaireOuvert()) {
+        <p class="etat-vide parcours-vide">Aucune expérience renseignée.</p>
+      }
+    }
+  </section>
+  <app-formations-profil [userId]="utilisateur.id" />
+} @else if (erreur()) {
+  <p class="message-erreur" role="alert">Impossible de charger ton profil.</p>
+} @else {
+  <p class="etat-vide" role="status">Chargement de ton profil…</p>
+}

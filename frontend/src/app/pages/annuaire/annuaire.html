@@ -43,7 +43,7 @@
   </section>
 
   @if (selection(); as membre) {
-    <aside class="carte profil">
+    <aside class="carte profil" [class.fiche-directe]="membre.id === membreDemande">
       <div class="profil-bandeau"></div>
       <div class="profil-identite">
         <app-avatar [initiales]="initiales(membre.prenom, membre.nom)" [teinte]="teinteAvatar(membre.id)" taille="grand" />
