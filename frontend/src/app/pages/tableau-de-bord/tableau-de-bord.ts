@@ -1,13 +1,13 @@
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { forkJoin, Subscription } from 'rxjs';
+import { catchError, forkJoin, of, Subscription } from 'rxjs';
 import { Avatar } from '../../composants/avatar/avatar';
 import { CarteEvenement } from '../../composants/carte-evenement/carte-evenement';
 import { CarteFrance, VilleMembres } from '../../composants/carte-france/carte-france';
 import { Evenement, MonInscription } from '../../modeles/evenement';
 import { Sujet } from '../../modeles/forum';
 import { Utilisateur } from '../../modeles/utilisateur';
-import { ilYa, initiales, normaliserVille, teinteAvatar } from '../../outils/format';
+import { ilYa, initiales, messageErreur, normaliserVille, teinteAvatar } from '../../outils/format';
 import { EvenementService } from '../../services/evenement.service';
 import { ForumService } from '../../services/forum.service';
 import { SessionService } from '../../services/session.service';
@@ -23,11 +23,14 @@ export class TableauDeBord implements OnInit, OnDestroy {
   private utilisateurService = inject(UtilisateurService);
   private evenementService = inject(EvenementService);
   private requetesEvenements = new Subscription();
+  private requetesPage = new Subscription();
   private forumService = inject(ForumService);
   session = inject(SessionService);
 
   membres = signal<Utilisateur[]>([]);
   villeChoisie = signal('');
+  chargementCommunaute = signal(true);
+  erreurCommunaute = signal('');
 
   villes = computed(() => {
     const parVille = new Map<string, VilleMembres>();
@@ -56,8 +59,12 @@ export class TableauDeBord implements OnInit, OnDestroy {
   inscriptions = signal<Record<number, MonInscription | null>>({});
   evenementEnCours = signal<number | null>(null);
   sujets = signal<Sujet[]>([]);
-  nombreCommentaires = signal<Record<number, number>>({});
-  chargement = signal(true);
+  nombreCommentaires = signal<Partial<Record<number, number>>>({});
+  chargementEvenements = signal(true);
+  erreurEvenements = signal('');
+  erreurInscription = signal('');
+  chargementForum = signal(true);
+  erreurForum = signal('');
 
   ilYa = ilYa;
   initiales = initiales;
@@ -71,10 +78,20 @@ export class TableauDeBord implements OnInit, OnDestroy {
 
   // GET /users : on compte les membres par ville pour la carte.
   chargerCommunaute(): void {
-    this.utilisateurService.lister().subscribe((membres) => this.membres.set(membres));
+    this.requetesPage.add(this.utilisateurService.lister().subscribe({
+      next: (membres) => {
+        this.membres.set(membres);
+        this.chargementCommunaute.set(false);
+      },
+      error: (erreur) => {
+        this.erreurCommunaute.set(messageErreur(erreur, 'Impossible de charger les membres.'));
+        this.chargementCommunaute.set(false);
+      },
+    }));
   }
 
   ngOnDestroy(): void {
+    this.requetesPage.unsubscribe();
     this.requetesEvenements.unsubscribe();
   }
 
@@ -82,48 +99,77 @@ export class TableauDeBord implements OnInit, OnDestroy {
   chargerEvenements(): void {
     this.requetesEvenements.unsubscribe();
     this.requetesEvenements = new Subscription();
-    this.requetesEvenements.add(this.evenementService.lister().subscribe((liste) => {
-      const prochains = liste.slice(0, 3);
-      this.inscriptions.set({});
-      this.evenements.set(prochains);
-      this.chargement.set(false);
-      for (const evenement of prochains) {
-        this.requetesEvenements.add(this.evenementService.monInscription(evenement.id).subscribe({
-          next: (inscription) => this.inscriptions.update((statuts) => ({ ...statuts, [evenement.id]: inscription })),
-          error: () => this.inscriptions.update((statuts) => ({ ...statuts, [evenement.id]: null })),
-        }));
-      }
+    this.chargementEvenements.set(true);
+    this.erreurEvenements.set('');
+    this.requetesEvenements.add(this.evenementService.lister().subscribe({
+      next: (liste) => {
+        const prochains = liste.slice(0, 3);
+        this.inscriptions.set({});
+        this.evenements.set(prochains);
+        this.chargementEvenements.set(false);
+        for (const evenement of prochains) {
+          this.requetesEvenements.add(this.evenementService.monInscription(evenement.id).subscribe({
+            next: (inscription) => this.inscriptions.update((statuts) => ({ ...statuts, [evenement.id]: inscription })),
+            error: () => this.inscriptions.update((statuts) => ({ ...statuts, [evenement.id]: null })),
+          }));
+        }
+      },
+      error: (erreur) => {
+        this.erreurEvenements.set(messageErreur(erreur, 'Impossible de charger les événements.'));
+        this.chargementEvenements.set(false);
+      },
     }));
   }
 
   // GET /api/posts : les 3 derniers sujets, puis le nombre de commentaires de chacun.
   chargerForum(): void {
-    this.forumService.lister(null).subscribe((liste) => {
-      const derniers = liste.slice(0, 3);
-      this.sujets.set(derniers);
-      if (derniers.length === 0) return;
-      forkJoin(derniers.map((sujet) => this.forumService.commentaires(sujet.id))).subscribe((listes) => {
-        const nombres: Record<number, number> = {};
-        derniers.forEach((sujet, index) => (nombres[sujet.id] = listes[index].length));
-        this.nombreCommentaires.set(nombres);
-      });
-    });
+    this.requetesPage.add(this.forumService.lister(null).subscribe({
+      next: (liste) => {
+        const derniers = liste.slice(0, 3);
+        this.sujets.set(derniers);
+        this.chargementForum.set(false);
+        if (derniers.length === 0) return;
+
+        const requetes = derniers.map((sujet) =>
+          this.forumService.commentaires(sujet.id).pipe(catchError(() => of(null))),
+        );
+        this.requetesPage.add(forkJoin(requetes).subscribe((listes) => {
+          const nombres: Record<number, number> = {};
+          derniers.forEach((sujet, index) => {
+            const commentaires = listes[index];
+            if (commentaires) nombres[sujet.id] = commentaires.length;
+          });
+          this.nombreCommentaires.set(nombres);
+        }));
+      },
+      error: (erreur) => {
+        this.erreurForum.set(messageErreur(erreur, 'Impossible de charger les discussions.'));
+        this.chargementForum.set(false);
+      },
+    }));
   }
 
   inscrire(evenementId: number): void {
     this.evenementEnCours.set(evenementId);
-    this.evenementService.inscrire(evenementId).subscribe({
+    this.erreurInscription.set('');
+    this.requetesPage.add(this.evenementService.inscrire(evenementId).subscribe({
       next: () => this.apresChangement(),
-      error: () => this.evenementEnCours.set(null),
-    });
+      error: (erreur) => this.echecInscription(erreur),
+    }));
   }
 
   desinscrire(evenementId: number): void {
     this.evenementEnCours.set(evenementId);
-    this.evenementService.desinscrire(evenementId).subscribe({
+    this.erreurInscription.set('');
+    this.requetesPage.add(this.evenementService.desinscrire(evenementId).subscribe({
       next: () => this.apresChangement(),
-      error: () => this.evenementEnCours.set(null),
-    });
+      error: (erreur) => this.echecInscription(erreur),
+    }));
+  }
+
+  private echecInscription(erreur: unknown): void {
+    this.evenementEnCours.set(null);
+    this.erreurInscription.set(messageErreur(erreur, "Impossible de modifier l’inscription."));
   }
 
   // Après une inscription ou une désinscription, on recharge pour avoir les bonnes jauges.

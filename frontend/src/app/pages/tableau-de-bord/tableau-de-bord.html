@@ -4,38 +4,48 @@
   <section class="carte bloc-carte">
     <div class="bloc-entete">
       <h2>La communauté</h2>
-      <span class="compteur">{{ membres().length }} membres</span>
+      @if (!chargementCommunaute() && !erreurCommunaute()) {
+        <span class="compteur">{{ membres().length }} membres</span>
+      }
     </div>
-    <app-carte-france
-      [villes]="villes()"
-      [villeChoisie]="villeChoisie()"
-      (villeSelectionnee)="villeChoisie.set($event)"
-    />
-    @if (villeChoisie(); as ville) {
-      <div class="membres-ville">
-        <div class="entete-ville" aria-live="polite">
-          <h3>{{ ville }}</h3>
-          <span class="compteur">{{ membresVille().length }} {{ membresVille().length === 1 ? 'membre' : 'membres' }}</span>
+    @if (chargementCommunaute()) {
+      <p class="etat-vide" role="status">Chargement des membres…</p>
+    } @else if (erreurCommunaute()) {
+      <p class="message-erreur" role="alert">{{ erreurCommunaute() }}</p>
+    } @else if (!villes().length) {
+      <p class="etat-vide">Aucune ville renseignée dans l’annuaire.</p>
+    } @else {
+      <app-carte-france
+        [villes]="villes()"
+        [villeChoisie]="villeChoisie()"
+        (villeSelectionnee)="villeChoisie.set($event)"
+      />
+      @if (villeChoisie(); as ville) {
+        <div class="membres-ville">
+          <div class="entete-ville" aria-live="polite">
+            <h3>{{ ville }}</h3>
+            <span class="compteur">{{ membresVille().length }} {{ membresVille().length === 1 ? 'membre' : 'membres' }}</span>
+          </div>
+          <ul class="apercu-membres">
+            @for (membre of membresVille().slice(0, 3); track membre.id) {
+              <li>
+                <a routerLink="/annuaire" [queryParams]="{ membre: membre.id }">
+                  <app-avatar
+                    [initiales]="initiales(membre.prenom, membre.nom)"
+                    [teinte]="teinteAvatar(membre.id)"
+                    taille="petit"
+                    aria-hidden="true"
+                  />
+                  {{ membre.prenom }} {{ membre.nom }}
+                </a>
+              </li>
+            }
+          </ul>
+          <a class="lien-texte lien-annuaire" routerLink="/annuaire" [queryParams]="{ ville: ville }">
+            Voir les membres à {{ ville }}
+          </a>
         </div>
-        <ul class="apercu-membres">
-          @for (membre of membresVille().slice(0, 3); track membre.id) {
-            <li>
-              <a routerLink="/annuaire" [queryParams]="{ membre: membre.id }">
-                <app-avatar
-                  [initiales]="initiales(membre.prenom, membre.nom)"
-                  [teinte]="teinteAvatar(membre.id)"
-                  taille="petit"
-                  aria-hidden="true"
-                />
-                {{ membre.prenom }} {{ membre.nom }}
-              </a>
-            </li>
-          }
-        </ul>
-        <a class="lien-texte lien-annuaire" routerLink="/annuaire" [queryParams]="{ ville: ville }">
-          Voir les membres à {{ ville }}
-        </a>
-      </div>
+      }
     }
   </section>
 
@@ -46,8 +56,13 @@
         <a class="lien-texte" routerLink="/evenements">Tout voir</a>
       </div>
 
-      @if (chargement()) {
-        <p class="etat-vide">Chargement…</p>
+      @if (erreurInscription()) {
+        <p class="message-erreur" role="alert">{{ erreurInscription() }}</p>
+      }
+      @if (chargementEvenements()) {
+        <p class="etat-vide" role="status">Chargement des événements…</p>
+      } @else if (erreurEvenements()) {
+        <p class="message-erreur" role="alert">{{ erreurEvenements() }}</p>
       } @else if (evenements().length === 0) {
         <p class="etat-vide">Aucun événement à venir pour l'instant.</p>
       } @else {
@@ -73,7 +88,11 @@
         <a class="lien-texte" routerLink="/forum">Tout voir</a>
       </div>
 
-      @if (sujets().length === 0) {
+      @if (chargementForum()) {
+        <p class="etat-vide" role="status">Chargement des discussions…</p>
+      } @else if (erreurForum()) {
+        <p class="message-erreur" role="alert">{{ erreurForum() }}</p>
+      } @else if (sujets().length === 0) {
         <p class="etat-vide">Pas encore de discussion.</p>
       } @else {
         <div class="liste">
@@ -82,7 +101,12 @@
               <strong>{{ sujet.titre }}</strong>
               <span class="meta">Par {{ sujet.auteurNom }} · {{ ilYa(sujet.createdAt) }}</span>
               <span class="extrait">« {{ sujet.description }} »</span>
-              <span class="meta">♥ {{ sujet.nombreLikes }} · {{ nombreCommentaires()[sujet.id] ?? 0 }} commentaire(s)</span>
+              <span class="meta">
+                ♥ {{ sujet.nombreLikes }}
+                @if (nombreCommentaires()[sujet.id] !== undefined) {
+                  · {{ nombreCommentaires()[sujet.id] }} commentaire(s)
+                }
+              </span>
             </a>
           }
         </div>
