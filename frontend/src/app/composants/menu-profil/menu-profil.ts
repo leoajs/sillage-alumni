@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { initiales, teinteAvatar } from '../../outils/format';
 import { AuthService } from '../../services/auth.service';
 import { SessionService } from '../../services/session.service';
@@ -7,7 +7,7 @@ import { Avatar } from '../avatar/avatar';
 
 @Component({
   selector: 'app-menu-profil',
-  imports: [Avatar],
+  imports: [Avatar, RouterLink],
   templateUrl: './menu-profil.html',
   styleUrl: './menu-profil.scss',
 })

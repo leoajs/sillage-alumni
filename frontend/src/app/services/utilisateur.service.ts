@@ -12,6 +12,10 @@ export class UtilisateurService {
     return this.http.get<Utilisateur[]>('/users');
   }
 
+  consulter(userId: number): Observable<Utilisateur> {
+    return this.http.get<Utilisateur>(`/users/${userId}`);
+  }
+
   // GET /api/users/{id}/experiences
   experiences(userId: number): Observable<Experience[]> {
     return this.http.get<Experience[]>(`/api/users/${userId}/experiences`);

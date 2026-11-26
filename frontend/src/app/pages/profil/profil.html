@@ -1,0 +1,32 @@
+@if (profil(); as utilisateur) {
+  <section class="carte profil">
+    <div class="profil-bandeau"></div>
+    <div class="profil-contenu">
+      <app-avatar
+        [initiales]="initiales(utilisateur.prenom, utilisateur.nom)"
+        [teinte]="teinteAvatar(utilisateur.id)"
+        taille="grand"
+        aria-hidden="true"
+      />
+      <h2>Informations personnelles</h2>
+      <dl class="informations">
+        <div>
+          <dt>Prénom</dt>
+          <dd>{{ utilisateur.prenom }}</dd>
+        </div>
+        <div>
+          <dt>Nom</dt>
+          <dd>{{ utilisateur.nom }}</dd>
+        </div>
+        <div>
+          <dt>Ville</dt>
+          <dd>{{ utilisateur.ville || 'Non renseignée' }}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+} @else if (erreur()) {
+  <p class="message-erreur" role="alert">Impossible de charger ton profil.</p>
+} @else {
+  <p class="etat-vide" role="status">Chargement de ton profil…</p>
+}
