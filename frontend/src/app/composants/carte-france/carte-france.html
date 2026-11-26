@@ -1,12 +1,23 @@
-<svg class="carte-svg" viewBox="0 0 610 600" role="img" aria-label="Carte des membres par ville">
+<svg class="carte-svg" viewBox="0 0 610 600" role="group" aria-label="Carte des membres par ville">
   <path class="pays" [attr.d]="contour" />
   <path class="pays" [attr.d]="corse" />
 
   @for (point of pointsSurCarte(); track point.ville) {
-    <g class="point" [attr.transform]="'translate(' + point.x + ' ' + point.y + ')'">
+    <g
+      class="point"
+      role="button"
+      tabindex="0"
+      [class.actif]="point.ville === villeChoisie"
+      [attr.aria-pressed]="point.ville === villeChoisie"
+      [attr.aria-label]="point.ville + ' · ' + point.nombre + (point.nombre === 1 ? ' membre' : ' membres')"
+      [attr.transform]="'translate(' + point.x + ' ' + point.y + ')'"
+      (click)="villeSelectionnee.emit(point.ville)"
+      (keydown.enter)="villeSelectionnee.emit(point.ville)"
+      (keydown.space)="$event.preventDefault(); villeSelectionnee.emit(point.ville)"
+    >
       <circle class="halo" [attr.r]="point.rayon + 9" />
       <circle class="coeur" [attr.r]="point.rayon" />
-      <g class="etiquette" transform="translate(0 -30)">
+      <g class="etiquette" transform="translate(0 -30)" aria-hidden="true">
         <rect x="-62" y="-15" width="124" height="28" rx="14" />
         <text text-anchor="middle" y="4">{{ point.ville }} · {{ point.nombre }}</text>
       </g>
@@ -14,11 +25,19 @@
   }
 </svg>
 
-@if (autresVilles().length > 0) {
-  <p class="autres">
-    Aussi :
-    @for (v of autresVilles(); track v.ville; let dernier = $last) {
-      {{ v.ville }} ({{ v.nombre }}){{ dernier ? '' : ', ' }}
-    }
-  </p>
+@if (villes.length > 0) {
+  <label class="choix-ville">
+    <span>Explorer par ville</span>
+    <select
+      #listeVilles
+      class="champ-select"
+      [value]="villeChoisie"
+      (change)="villeSelectionnee.emit(listeVilles.value)"
+    >
+      <option value="">Choisir une ville</option>
+      @for (ville of villes; track ville.ville) {
+        <option [value]="ville.ville">{{ ville.ville }} ({{ ville.nombre }})</option>
+      }
+    </select>
+  </label>
 }

@@ -4,9 +4,36 @@
   <section class="carte bloc-carte">
     <div class="bloc-entete">
       <h2>La communauté</h2>
-      <span class="compteur">{{ nombreMembres() }} membres</span>
+      <span class="compteur">{{ membres().length }} membres</span>
     </div>
-    <app-carte-france [villes]="villes()" />
+    <app-carte-france
+      [villes]="villes()"
+      [villeChoisie]="villeChoisie()"
+      (villeSelectionnee)="villeChoisie.set($event)"
+    />
+    @if (villeChoisie(); as ville) {
+      <div class="membres-ville">
+        <div class="entete-ville" aria-live="polite">
+          <h3>{{ ville }}</h3>
+          <span class="compteur">{{ membresVille().length }} {{ membresVille().length === 1 ? 'membre' : 'membres' }}</span>
+        </div>
+        <ul class="apercu-membres">
+          @for (membre of membresVille().slice(0, 3); track membre.id) {
+            <li>
+              <a routerLink="/annuaire" [queryParams]="{ membre: membre.id }">
+                <app-avatar
+                  [initiales]="initiales(membre.prenom, membre.nom)"
+                  [teinte]="teinteAvatar(membre.id)"
+                  taille="petit"
+                  aria-hidden="true"
+                />
+                {{ membre.prenom }} {{ membre.nom }}
+              </a>
+            </li>
+          }
+        </ul>
+      </div>
+    }
   </section>
 
   <div class="colonne">

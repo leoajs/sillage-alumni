@@ -1,11 +1,13 @@
-import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { forkJoin, Subscription } from 'rxjs';
+import { Avatar } from '../../composants/avatar/avatar';
 import { CarteEvenement } from '../../composants/carte-evenement/carte-evenement';
 import { CarteFrance, VilleMembres } from '../../composants/carte-france/carte-france';
 import { Evenement, MonInscription } from '../../modeles/evenement';
 import { Sujet } from '../../modeles/forum';
-import { ilYa } from '../../outils/format';
+import { Utilisateur } from '../../modeles/utilisateur';
+import { ilYa, initiales, normaliserVille, teinteAvatar } from '../../outils/format';
 import { EvenementService } from '../../services/evenement.service';
 import { ForumService } from '../../services/forum.service';
 import { SessionService } from '../../services/session.service';
@@ -13,7 +15,7 @@ import { UtilisateurService } from '../../services/utilisateur.service';
 
 @Component({
   selector: 'app-tableau-de-bord',
-  imports: [RouterLink, CarteFrance, CarteEvenement],
+  imports: [RouterLink, Avatar, CarteFrance, CarteEvenement],
   templateUrl: './tableau-de-bord.html',
   styleUrl: './tableau-de-bord.scss',
 })
@@ -24,8 +26,32 @@ export class TableauDeBord implements OnInit, OnDestroy {
   private forumService = inject(ForumService);
   session = inject(SessionService);
 
-  villes = signal<VilleMembres[]>([]);
-  nombreMembres = signal(0);
+  membres = signal<Utilisateur[]>([]);
+  villeChoisie = signal('');
+
+  villes = computed(() => {
+    const parVille = new Map<string, VilleMembres>();
+    for (const membre of this.membres()) {
+      const ville = membre.ville?.trim();
+      if (!ville) continue;
+
+      const cle = normaliserVille(ville);
+      const groupe = parVille.get(cle);
+      if (groupe) {
+        groupe.nombre++;
+      } else {
+        parVille.set(cle, { ville, nombre: 1 });
+      }
+    }
+    return [...parVille.values()].sort((a, b) => a.ville.localeCompare(b.ville, 'fr'));
+  });
+
+  membresVille = computed(() => {
+    const ville = normaliserVille(this.villeChoisie());
+    return ville
+      ? this.membres().filter((membre) => normaliserVille(membre.ville ?? '') === ville)
+      : [];
+  });
   evenements = signal<Evenement[]>([]);
   inscriptions = signal<Record<number, MonInscription | null>>({});
   evenementEnCours = signal<number | null>(null);
@@ -34,6 +60,8 @@ export class TableauDeBord implements OnInit, OnDestroy {
   chargement = signal(true);
 
   ilYa = ilYa;
+  initiales = initiales;
+  teinteAvatar = teinteAvatar;
 
   ngOnInit(): void {
     this.chargerCommunaute();
@@ -43,16 +71,7 @@ export class TableauDeBord implements OnInit, OnDestroy {
 
   // GET /users : on compte les membres par ville pour la carte.
   chargerCommunaute(): void {
-    this.utilisateurService.lister().subscribe((membres) => {
-      const parVille: Record<string, number> = {};
-      for (const membre of membres) {
-        if (membre.ville) {
-          parVille[membre.ville] = (parVille[membre.ville] ?? 0) + 1;
-        }
-      }
-      this.villes.set(Object.entries(parVille).map(([ville, nombre]) => ({ ville, nombre })));
-      this.nombreMembres.set(membres.length);
-    });
+    this.utilisateurService.lister().subscribe((membres) => this.membres.set(membres));
   }
 
   ngOnDestroy(): void {

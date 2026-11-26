@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { normaliserVille } from '../../outils/format';
 
 // Nombre de membres dans une ville
 export interface VilleMembres {
@@ -45,11 +46,6 @@ const POSITIONS: Record<string, { x: number; y: number }> = {
   ajaccio: { x: 558, y: 550 },
 };
 
-// "Saint-Étienne" -> "saint-etienne" pour retrouver la ville dans POSITIONS
-function normaliser(ville: string): string {
-  return ville.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-}
-
 @Component({
   selector: 'app-carte-france',
   templateUrl: './carte-france.html',
@@ -57,6 +53,8 @@ function normaliser(ville: string): string {
 })
 export class CarteFrance {
   @Input() villes: VilleMembres[] = [];
+  @Input() villeChoisie = '';
+  @Output() villeSelectionnee = new EventEmitter<string>();
 
   // Contour simplifié de la France métropolitaine et de la Corse
   readonly contour =
@@ -67,16 +65,11 @@ export class CarteFrance {
   pointsSurCarte() {
     const plusGrand = Math.max(1, ...this.villes.map((v) => v.nombre));
     return this.villes
-      .filter((v) => POSITIONS[normaliser(v.ville)])
+      .filter((v) => POSITIONS[normaliserVille(v.ville)])
       .map((v) => ({
         ...v,
-        ...POSITIONS[normaliser(v.ville)],
+        ...POSITIONS[normaliserVille(v.ville)],
         rayon: 7 + (v.nombre / plusGrand) * 11,
       }));
-  }
-
-  // Les villes absentes de la liste : on les affiche sous la carte
-  autresVilles(): VilleMembres[] {
-    return this.villes.filter((v) => !POSITIONS[normaliser(v.ville)]);
   }
 }

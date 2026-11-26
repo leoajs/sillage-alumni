@@ -28,6 +28,26 @@
   fill: var(--encre);
 }
 
+.point {
+  cursor: pointer;
+
+  &:hover .coeur,
+  &.actif .coeur {
+    fill: var(--bleu);
+    stroke: var(--carte);
+    stroke-width: 3px;
+  }
+
+  &:focus-visible .coeur {
+    stroke: var(--bleu);
+    stroke-width: 4px;
+  }
+}
+
+.point.actif .etiquette rect {
+  fill: var(--bleu);
+}
+
 .etiquette rect {
   fill: var(--encre);
 }
@@ -48,10 +68,18 @@
   }
 }
 
-.autres {
+.choix-ville {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
   margin: 12px 0 0;
   font-size: 0.85rem;
   color: var(--texte-doux);
+
+  select {
+    max-width: 100%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

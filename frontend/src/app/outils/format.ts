@@ -45,3 +45,7 @@ export function messageErreur(erreur: any, parDefaut: string): string {
   }
   return parDefaut;
 }
+// Pour comparer les noms de villes malgré les accents, la casse et les espaces.
+export function normaliserVille(ville: string): string {
+  return ville.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
