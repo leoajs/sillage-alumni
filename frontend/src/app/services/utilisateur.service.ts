@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Experience, Formation, Utilisateur } from '../modeles/utilisateur';
+import { Experience, Formation, NouvelleExperience, Utilisateur } from '../modeles/utilisateur';
 
 @Injectable({ providedIn: 'root' })
 export class UtilisateurService {
@@ -19,6 +19,10 @@ export class UtilisateurService {
   // GET /api/users/{id}/experiences
   experiences(userId: number): Observable<Experience[]> {
     return this.http.get<Experience[]>(`/api/users/${userId}/experiences`);
+  }
+
+  ajouterExperience(userId: number, experience: NouvelleExperience): Observable<Experience> {
+    return this.http.post<Experience>(`/api/users/${userId}/experiences`, experience);
   }
 
   // GET /api/users/{id}/formations

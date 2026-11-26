@@ -21,14 +21,17 @@ export interface NouvelUtilisateur {
   ville: string | null;
 }
 
-// GET /api/users/{id}/experiences
-export interface Experience {
-  id: number;
+// POST /api/users/{id}/experiences
+export interface NouvelleExperience {
   entreprise: string;
   poste: string;
   anneeDebut: number;
   anneeFin: number | null;
   commentaire: string | null;
+}
+
+export interface Experience extends NouvelleExperience {
+  id: number;
 }
 
 // GET /api/users/{id}/formations
