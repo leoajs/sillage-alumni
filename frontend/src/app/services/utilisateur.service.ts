@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Experience, Formation, NouvelleExperience, Utilisateur } from '../modeles/utilisateur';
+import { Experience, Formation, NouvelleExperience, NouvelleFormation, Utilisateur } from '../modeles/utilisateur';
 
 @Injectable({ providedIn: 'root' })
 export class UtilisateurService {
@@ -28,5 +28,9 @@ export class UtilisateurService {
   // GET /api/users/{id}/formations
   formations(userId: number): Observable<Formation[]> {
     return this.http.get<Formation[]>(`/api/users/${userId}/formations`);
+  }
+
+  ajouterFormation(userId: number, formation: NouvelleFormation): Observable<Formation> {
+    return this.http.post<Formation>(`/api/users/${userId}/formations`, formation);
   }
 }

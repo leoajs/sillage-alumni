@@ -34,15 +34,17 @@ export interface Experience extends NouvelleExperience {
   id: number;
 }
 
-// GET /api/users/{id}/formations
-export interface Formation {
-  id: number;
+export interface NouvelleFormation {
   etablissementId: number;
-  etablissementNom: string;
   parcoursId: number | null;
-  parcoursCode: string | null;
-  parcoursIntitule: string | null;
   anneeDebut: number;
   anneeFin: number | null;
   commentaire: string | null;
+}
+
+export interface Formation extends NouvelleFormation {
+  id: number;
+  etablissementNom: string;
+  parcoursCode: string | null;
+  parcoursIntitule: string | null;
 }

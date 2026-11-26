@@ -1,0 +1,114 @@
+<section class="carte section-parcours" aria-labelledby="titre-formations">
+  <header class="bloc-entete section-parcours-entete">
+    <h2 id="titre-formations">Formations</h2>
+    @if (!chargement() && !erreurChargement() && !formulaireOuvert()) {
+      <button class="bouton bouton-doux" type="button" (click)="ouvrirFormulaire()">
+        <span aria-hidden="true">+</span> Ajouter une formation
+      </button>
+    }
+  </header>
+
+  @if (chargement()) {
+    <p class="etat-vide" role="status">Chargement de tes formations…</p>
+  } @else if (erreurChargement()) {
+    <p class="message-erreur" role="alert">Impossible de charger tes formations.</p>
+    <button class="bouton bouton-discret" type="button" (click)="charger()">Réessayer</button>
+  } @else {
+    @if (formulaireOuvert()) {
+      <form class="formulaire-parcours" [formGroup]="formulaire" (ngSubmit)="ajouter()">
+        <h3>Nouveau cursus MIAGE</h3>
+        <fieldset [disabled]="envoiEnCours()" aria-label="Informations sur la formation">
+          <label class="champ">
+            <span>Université</span>
+            <select formControlName="etablissementId" (change)="formulaire.controls.parcoursId.reset()" required>
+              <option [ngValue]="null" disabled>Choisir une université</option>
+              @for (universite of universites; track universite.id) {
+                <option [ngValue]="universite.id">{{ universite.nom }}</option>
+              }
+            </select>
+            @if (formulaire.controls.etablissementId.touched && formulaire.controls.etablissementId.invalid) {
+              <small class="erreur-champ">Choisis une université.</small>
+            }
+          </label>
+          @if (parcoursProposes().length) {
+            <label class="champ">
+              <span>Spécialité <em>(facultative)</em></span>
+              <select formControlName="parcoursId">
+                <option [ngValue]="null">Aucune spécialité sélectionnée</option>
+                @for (parcours of parcoursProposes(); track parcours.id) {
+                  <option [ngValue]="parcours.id">{{ parcours.nom }}</option>
+                }
+              </select>
+            </label>
+          }
+          <div class="ligne-champs">
+            <label class="champ">
+              <span>Année de début</span>
+              <input type="number" inputmode="numeric" formControlName="anneeDebut" required />
+              @if (formulaire.controls.anneeDebut.touched && formulaire.controls.anneeDebut.invalid) {
+                <small class="erreur-champ">Saisis une année sur quatre chiffres.</small>
+              }
+            </label>
+            <label class="champ">
+              <span>Année de fin <em>(facultative)</em></span>
+              <input type="number" inputmode="numeric" formControlName="anneeFin" aria-describedby="aide-fin-formation" />
+              <small id="aide-fin-formation" class="aide-parcours">Laisse vide si la formation est en cours.</small>
+              @if (formulaire.controls.anneeFin.touched && formulaire.controls.anneeFin.invalid) {
+                <small class="erreur-champ">Saisis une année sur quatre chiffres.</small>
+              }
+            </label>
+          </div>
+          <label class="champ">
+            <span>Commentaire <em>(facultatif)</em></span>
+            <textarea formControlName="commentaire" rows="3"></textarea>
+          </label>
+          @if (erreurAjout()) {
+            <p class="message-erreur" role="alert">{{ erreurAjout() }}</p>
+          }
+          <div class="actions-formulaire">
+            <button class="bouton bouton-discret" type="button" (click)="fermerFormulaire()">Annuler</button>
+            <button class="bouton bouton-plein" type="submit">
+              {{ envoiEnCours() ? 'Enregistrement…' : 'Enregistrer' }}
+            </button>
+          </div>
+        </fieldset>
+      </form>
+    }
+
+    @if (formationAjoutee()) {
+      <p class="ajout-confirme" role="status">Formation ajoutée.</p>
+    }
+
+    @if (formations().length) {
+      <ol class="frise" role="list">
+        @for (formation of formationsTriees(); track formation.id) {
+          <li class="frise-element">
+            <div class="frise-entete">
+              <div>
+                <h3>Master MIAGE@if (formation.parcoursCode) { · {{ formation.parcoursCode }}}</h3>
+                <p class="frise-sous-titre">{{ formation.etablissementNom }}</p>
+              </div>
+              <span class="badge teinte-violet">
+                @if (formation.anneeFin === null) {
+                  Depuis {{ formation.anneeDebut }}
+                } @else if (formation.anneeDebut === formation.anneeFin) {
+                  {{ formation.anneeDebut }}
+                } @else {
+                  {{ formation.anneeDebut }} – {{ formation.anneeFin }}
+                }
+              </span>
+            </div>
+            @if (formation.parcoursIntitule) {
+              <p class="frise-sous-titre">{{ formation.parcoursIntitule }}</p>
+            }
+            @if (formation.commentaire) {
+              <p class="frise-commentaire">{{ formation.commentaire }}</p>
+            }
+          </li>
+        }
+      </ol>
+    } @else if (!formulaireOuvert()) {
+      <p class="etat-vide parcours-vide">Aucune formation renseignée.</p>
+    }
+  }
+</section>

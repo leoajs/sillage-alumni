@@ -5,12 +5,13 @@ import { Experience, Utilisateur } from '../../modeles/utilisateur';
 import { initiales, messageErreur, teinteAvatar } from '../../outils/format';
 import { SessionService } from '../../services/session.service';
 import { UtilisateurService } from '../../services/utilisateur.service';
+import { FormationsProfil } from './formations-profil';
 
 @Component({
   selector: 'app-profil',
-  imports: [Avatar, ReactiveFormsModule],
+  imports: [Avatar, ReactiveFormsModule, FormationsProfil],
   templateUrl: './profil.html',
-  styleUrl: './profil.scss',
+  styleUrls: ['./profil.scss', './parcours-profil.scss'],
 })
 export class Profil implements OnInit {
   private fb = inject(FormBuilder);
