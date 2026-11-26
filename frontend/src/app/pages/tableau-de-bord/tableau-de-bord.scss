@@ -30,6 +30,57 @@
   color: var(--texte-doux);
 }
 
+.membres-ville {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--bordure);
+  border-radius: 14px;
+  background: var(--carte);
+}
+
+.entete-ville {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+  }
+}
+
+.apercu-membres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px 4px 4px;
+    border-radius: var(--rayon);
+    background: var(--fond);
+    color: var(--encre);
+    font-size: 0.85rem;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.lien-annuaire {
+  display: inline-block;
+  margin-top: 12px;
+}
+
 .liste {
   display: flex;
   flex-direction: column;
