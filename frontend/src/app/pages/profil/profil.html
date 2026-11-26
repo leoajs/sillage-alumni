@@ -2,12 +2,17 @@
   <section class="carte profil">
     <div class="profil-bandeau"></div>
     <div class="profil-contenu">
-      <app-avatar
-        [initiales]="initiales(utilisateur.prenom, utilisateur.nom)"
-        [teinte]="teinteAvatar(utilisateur.id)"
-        taille="grand"
-        aria-hidden="true"
-      />
+      <div class="profil-entete">
+        <app-avatar
+          [initiales]="initiales(utilisateur.prenom, utilisateur.nom)"
+          [teinte]="teinteAvatar(utilisateur.id)"
+          taille="grand"
+          aria-hidden="true"
+        />
+        <a class="bouton bouton-doux" routerLink="/annuaire" [queryParams]="{ membre: utilisateur.id }">
+          Voir ma fiche dans l’annuaire
+        </a>
+      </div>
       <h2>Informations personnelles</h2>
       <dl class="informations">
         <div>

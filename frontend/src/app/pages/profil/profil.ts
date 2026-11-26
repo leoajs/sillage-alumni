@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Avatar } from '../../composants/avatar/avatar';
 import { Experience, Utilisateur } from '../../modeles/utilisateur';
 import { initiales, messageErreur, teinteAvatar } from '../../outils/format';
@@ -9,7 +10,7 @@ import { FormationsProfil } from './formations-profil';
 
 @Component({
   selector: 'app-profil',
-  imports: [Avatar, ReactiveFormsModule, FormationsProfil],
+  imports: [Avatar, ReactiveFormsModule, RouterLink, FormationsProfil],
   templateUrl: './profil.html',
   styleUrls: ['./profil.scss', './parcours-profil.scss'],
 })

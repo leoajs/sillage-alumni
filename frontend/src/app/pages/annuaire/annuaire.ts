@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { forkJoin, Subscription } from 'rxjs';
 import { Avatar } from '../../composants/avatar/avatar';
 import { Experience, Formation, Utilisateur } from '../../modeles/utilisateur';
@@ -16,6 +17,7 @@ import { UtilisateurService } from '../../services/utilisateur.service';
 export class Annuaire implements OnInit, OnDestroy {
   private utilisateurService = inject(UtilisateurService);
   private session = inject(SessionService);
+  private route = inject(ActivatedRoute);
   private requeteProfil?: Subscription;
   private requeteMembres?: Subscription;
 
@@ -26,6 +28,7 @@ export class Annuaire implements OnInit, OnDestroy {
   erreur = signal('');
 
   selection = signal<Utilisateur | null>(null);
+  membreDemande = Number(this.route.snapshot.queryParamMap.get('membre'));
   experiences = signal<Experience[]>([]);
   formations = signal<Formation[]>([]);
   chargementProfil = signal(false);
@@ -60,8 +63,9 @@ export class Annuaire implements OnInit, OnDestroy {
       next: (liste) => {
         this.membres.set(liste);
         this.chargement.set(false);
-        if (liste.length > 0) {
-          this.choisir(liste[0]);
+        const premierProfil = liste.find((membre) => membre.id === this.membreDemande) ?? liste[0];
+        if (premierProfil) {
+          this.choisir(premierProfil);
         }
       },
       error: (erreur) => {
