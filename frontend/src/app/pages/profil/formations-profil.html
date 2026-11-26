@@ -88,7 +88,7 @@
                 <h3>Master MIAGE@if (formation.parcoursCode) { · {{ formation.parcoursCode }}}</h3>
                 <p class="frise-sous-titre">{{ formation.etablissementNom }}</p>
               </div>
-              <span class="badge teinte-violet">
+              <span class="frise-dates">
                 @if (formation.anneeFin === null) {
                   Depuis {{ formation.anneeDebut }}
                 } @else if (formation.anneeDebut === formation.anneeFin) {
