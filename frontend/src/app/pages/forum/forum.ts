@@ -1,6 +1,7 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { CarteSujet } from '../../composants/carte-sujet/carte-sujet';
 import { CATEGORIES_FORUM } from '../../modeles/categories';
 import { Sujet } from '../../modeles/forum';
@@ -14,9 +15,10 @@ import { SessionService } from '../../services/session.service';
   templateUrl: './forum.html',
   styleUrl: './forum.scss',
 })
-export class Forum implements OnInit {
+export class Forum implements OnInit, OnDestroy {
   private forumService = inject(ForumService);
   private session = inject(SessionService);
+  private requeteListe?: Subscription;
 
   categories = CATEGORIES_FORUM;
 
@@ -37,11 +39,16 @@ export class Forum implements OnInit {
     this.charger();
   }
 
+  ngOnDestroy(): void {
+    this.requeteListe?.unsubscribe();
+  }
+
   // GET /api/posts?categorieId=...&motCle=...
   charger(): void {
+    this.requeteListe?.unsubscribe();
     this.chargement.set(true);
     this.erreur.set('');
-    this.forumService.lister(this.categorieChoisie(), this.recherche).subscribe({
+    this.requeteListe = this.forumService.lister(this.categorieChoisie(), this.recherche).subscribe({
       next: (liste) => {
         this.sujets.set(liste);
         this.chargement.set(false);

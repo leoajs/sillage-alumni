@@ -19,7 +19,6 @@ export interface NouvelUtilisateur {
   email: string;
   motDePasse: string;
   ville: string | null;
-  role: Role;
 }
 
 // GET /api/users/{id}/experiences

@@ -13,7 +13,8 @@ import { Evenement, MonInscription } from '../../modeles/evenement';
 })
 export class CarteEvenement {
   @Input({ required: true }) evenement!: Evenement;
-  @Input() inscription: MonInscription | null = null;
+  // undefined pendant le chargement, null si la requête échoue.
+  @Input() inscription: MonInscription | null | undefined;
   @Input() estMonEvenement = false;
   @Input() enCours = false; // une requête d'inscription est en cours pour cet événement
   @Input() compact = false; // version courte pour le tableau de bord

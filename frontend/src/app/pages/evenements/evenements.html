@@ -32,7 +32,7 @@
     @for (evenement of evenementsAffiches(); track evenement.id) {
       <app-carte-evenement
         [evenement]="evenement"
-        [inscription]="inscriptions()[evenement.id] ?? null"
+        [inscription]="inscriptions()[evenement.id]"
         [estMonEvenement]="estMonEvenement(evenement)"
         [enCours]="evenementEnCours() === evenement.id"
         (inscrire)="inscrire($event)"

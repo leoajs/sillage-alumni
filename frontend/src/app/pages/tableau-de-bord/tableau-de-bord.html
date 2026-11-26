@@ -26,7 +26,7 @@
             <app-carte-evenement
               class="mini"
               [evenement]="evenement"
-              [inscription]="inscriptions()[evenement.id] ?? null"
+              [inscription]="inscriptions()[evenement.id]"
               [enCours]="evenementEnCours() === evenement.id"
               [compact]="true"
               (inscrire)="inscrire($event)"

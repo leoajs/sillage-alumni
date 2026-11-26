@@ -3,7 +3,6 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { switchMap } from 'rxjs';
 import { EnTete } from '../../composants/en-tete/en-tete';
-import { Role } from '../../modeles/session';
 import { messageErreur } from '../../outils/format';
 import { AuthService } from '../../services/auth.service';
 
@@ -24,7 +23,6 @@ export class Inscription {
     email: ['', [Validators.required, Validators.email]],
     motDePasse: ['', [Validators.required, Validators.minLength(6)]],
     ville: ['', Validators.maxLength(100)],
-    role: ['ETUDIANT' as Role, Validators.required],
   });
 
   envoiEnCours = signal(false);

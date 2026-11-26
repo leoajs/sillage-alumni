@@ -1,6 +1,6 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Subscription } from 'rxjs';
 import { Avatar } from '../../composants/avatar/avatar';
 import { Experience, Formation, Utilisateur } from '../../modeles/utilisateur';
 import { initiales, messageErreur, teinteAvatar } from '../../outils/format';
@@ -13,9 +13,11 @@ import { UtilisateurService } from '../../services/utilisateur.service';
   templateUrl: './annuaire.html',
   styleUrl: './annuaire.scss',
 })
-export class Annuaire implements OnInit {
+export class Annuaire implements OnInit, OnDestroy {
   private utilisateurService = inject(UtilisateurService);
   private session = inject(SessionService);
+  private requeteProfil?: Subscription;
+  private requeteMembres?: Subscription;
 
   membres = signal<Utilisateur[]>([]);
   recherche = signal('');
@@ -54,7 +56,7 @@ export class Annuaire implements OnInit {
 
   ngOnInit(): void {
     // GET /users
-    this.utilisateurService.lister().subscribe({
+    this.requeteMembres = this.utilisateurService.lister().subscribe({
       next: (liste) => {
         this.membres.set(liste);
         this.chargement.set(false);
@@ -69,11 +71,20 @@ export class Annuaire implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    this.requeteMembres?.unsubscribe();
+    this.requeteProfil?.unsubscribe();
+  }
+
   // GET /api/users/{id}/experiences et /formations pour le profil sélectionné
   choisir(membre: Utilisateur): void {
+    // Une réponse tardive ne doit pas remplir la fiche du membre suivant.
+    this.requeteProfil?.unsubscribe();
     this.selection.set(membre);
+    this.experiences.set([]);
+    this.formations.set([]);
     this.chargementProfil.set(true);
-    forkJoin({
+    this.requeteProfil = forkJoin({
       experiences: this.utilisateurService.experiences(membre.id),
       formations: this.utilisateurService.formations(membre.id),
     }).subscribe({
@@ -83,8 +94,6 @@ export class Annuaire implements OnInit {
         this.chargementProfil.set(false);
       },
       error: () => {
-        this.experiences.set([]);
-        this.formations.set([]);
         this.chargementProfil.set(false);
       },
     });

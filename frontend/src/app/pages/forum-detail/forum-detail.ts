@@ -1,6 +1,8 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { Avatar } from '../../composants/avatar/avatar';
 import { teinteCategorie } from '../../modeles/categories';
 import { Commentaire, Sujet } from '../../modeles/forum';
@@ -14,8 +16,9 @@ import { SessionService } from '../../services/session.service';
   templateUrl: './forum-detail.html',
   styleUrl: './forum-detail.scss',
 })
-export class ForumDetail implements OnInit {
+export class ForumDetail implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
+  private destruction = inject(DestroyRef);
   private forumService = inject(ForumService);
   private session = inject(SessionService);
   private fb = inject(FormBuilder);
@@ -39,13 +42,33 @@ export class ForumDetail implements OnInit {
   ilYa = ilYa;
 
   private sujetId = 0;
+  private requetesSujet = new Subscription();
 
   ngOnInit(): void {
-    // L'identifiant du sujet vient de l'adresse : /forum/:id
-    this.sujetId = Number(this.route.snapshot.paramMap.get('id'));
+    // Angular réutilise cette page quand seul l'identifiant change.
+    this.route.paramMap.pipe(takeUntilDestroyed(this.destruction)).subscribe((parametres) => {
+      this.chargerSujet(Number(parametres.get('id')));
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.requetesSujet.unsubscribe();
+  }
+
+  private chargerSujet(sujetId: number): void {
+    this.requetesSujet.unsubscribe();
+    this.requetesSujet = new Subscription();
+    this.sujetId = sujetId;
+    this.sujet.set(null);
+    this.commentaires.set([]);
+    this.chargement.set(true);
+    this.erreur.set('');
+    this.erreurCommentaire.set('');
+    this.envoiEnCours.set(false);
+    this.formulaire.reset();
 
     // GET /api/posts/{id}
-    this.forumService.detail(this.sujetId).subscribe({
+    this.requetesSujet.add(this.forumService.detail(sujetId).subscribe({
       next: (sujet) => {
         this.sujet.set(sujet);
         this.chargement.set(false);
@@ -54,20 +77,19 @@ export class ForumDetail implements OnInit {
         this.erreur.set(messageErreur(erreur, 'Ce sujet est introuvable.'));
         this.chargement.set(false);
       },
-    });
-    this.chargerCommentaires();
-  }
-
-  // GET /api/posts/{id}/comments
-  chargerCommentaires(): void {
-    this.forumService.commentaires(this.sujetId).subscribe((liste) => this.commentaires.set(liste));
+    }));
+    this.requetesSujet.add(this.forumService.commentaires(sujetId).subscribe({
+      next: (liste) => this.commentaires.set(liste),
+      error: (erreur) => this.erreurCommentaire.set(messageErreur(erreur, 'Impossible de charger les commentaires.')),
+    }));
   }
 
   // POST /api/posts/{id}/like
   aimer(): void {
+    const requetesSujet = this.requetesSujet;
     this.forumService.basculerLike(this.sujetId).subscribe((etat) => {
       const sujet = this.sujet();
-      if (sujet) {
+      if (sujet && !requetesSujet.closed) {
         this.sujet.set({ ...sujet, likeParMoi: etat.aime, nombreLikes: etat.nombreLikes });
       }
     });
@@ -81,13 +103,16 @@ export class ForumDetail implements OnInit {
     }
     this.envoiEnCours.set(true);
     this.erreurCommentaire.set('');
+    const requetesSujet = this.requetesSujet;
     this.forumService.commenter(this.sujetId, this.formulaire.getRawValue().texte).subscribe({
       next: (commentaire) => {
+        if (requetesSujet.closed) return;
         this.commentaires.set([...this.commentaires(), commentaire]);
         this.formulaire.reset();
         this.envoiEnCours.set(false);
       },
       error: (erreur) => {
+        if (requetesSujet.closed) return;
         this.erreurCommentaire.set(messageErreur(erreur, "Le commentaire n'a pas pu être publié."));
         this.envoiEnCours.set(false);
       },
@@ -96,9 +121,16 @@ export class ForumDetail implements OnInit {
 
   // DELETE /api/posts/comments/{id}
   supprimer(commentaire: Commentaire): void {
+    const requetesSujet = this.requetesSujet;
     this.forumService.supprimerCommentaire(commentaire.id).subscribe({
-      next: () => this.commentaires.set(this.commentaires().filter((c) => c.id !== commentaire.id)),
-      error: (erreur) => this.erreurCommentaire.set(messageErreur(erreur, 'Suppression impossible.')),
+      next: () => {
+        if (requetesSujet.closed) return;
+        this.commentaires.set(this.commentaires().filter((c) => c.id !== commentaire.id));
+      },
+      error: (erreur) => {
+        if (requetesSujet.closed) return;
+        this.erreurCommentaire.set(messageErreur(erreur, 'Suppression impossible.'));
+      },
     });
   }
 

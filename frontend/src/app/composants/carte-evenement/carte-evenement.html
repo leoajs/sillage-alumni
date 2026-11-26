@@ -39,7 +39,11 @@
     }
 
     <div class="actions">
-      @if (statut === 'INSCRIT') {
+      @if (inscription === undefined) {
+        <span class="etat">Chargement de ton inscription…</span>
+      } @else if (inscription === null) {
+        <span class="etat">Statut d'inscription indisponible.</span>
+      } @else if (statut === 'INSCRIT') {
         <span class="etat etat-vert">Inscrit ✓</span>
         <button class="lien-texte lien-danger" type="button" [disabled]="enCours" (click)="desinscrire.emit(evenement.id)">
           Se désinscrire
@@ -59,7 +63,7 @@
         </button>
       }
 
-      @if (compact && evenement.capaciteMax !== null && !participe) {
+      @if (compact && inscription && evenement.capaciteMax !== null && !participe) {
         <span class="capacite">{{ evenement.nombreInscrits }} / {{ evenement.capaciteMax }}</span>
       }
     </div>

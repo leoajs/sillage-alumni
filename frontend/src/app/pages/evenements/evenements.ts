@@ -1,6 +1,7 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { CarteEvenement } from '../../composants/carte-evenement/carte-evenement';
 import { CATEGORIES_EVENEMENT } from '../../modeles/categories';
 import { Evenement, MonInscription } from '../../modeles/evenement';
@@ -14,14 +15,15 @@ import { SessionService } from '../../services/session.service';
   templateUrl: './evenements.html',
   styleUrl: './evenements.scss',
 })
-export class Evenements implements OnInit {
+export class Evenements implements OnInit, OnDestroy {
   private evenementService = inject(EvenementService);
+  private requetesEvenements = new Subscription();
   session = inject(SessionService);
 
   categories = CATEGORIES_EVENEMENT;
 
   evenements = signal<Evenement[]>([]);
-  inscriptions = signal<Record<number, MonInscription>>({});
+  inscriptions = signal<Record<number, MonInscription | null>>({});
   categorieChoisie = signal<number | null>(null); // null = toutes
   recherche = '';
   chargement = signal(true);
@@ -40,12 +42,19 @@ export class Evenements implements OnInit {
     this.charger();
   }
 
+  ngOnDestroy(): void {
+    this.requetesEvenements.unsubscribe();
+  }
+
   // GET /api/events?motCle=...
   charger(): void {
+    this.requetesEvenements.unsubscribe();
+    this.requetesEvenements = new Subscription();
     this.chargement.set(true);
     this.erreur.set('');
-    this.evenementService.lister(this.recherche).subscribe({
+    this.requetesEvenements.add(this.evenementService.lister(this.recherche).subscribe({
       next: (liste) => {
+        this.inscriptions.set({});
         this.evenements.set(liste);
         this.chargement.set(false);
         this.chargerInscriptions(liste);
@@ -54,7 +63,7 @@ export class Evenements implements OnInit {
         this.erreur.set(messageErreur(erreur, 'Impossible de charger les événements.'));
         this.chargement.set(false);
       },
-    });
+    }));
   }
 
   choisirCategorie(categorieId: number | null): void {
@@ -84,9 +93,10 @@ export class Evenements implements OnInit {
   // GET /api/events/{id}/inscriptions/me pour chaque événement affiché
   private chargerInscriptions(liste: Evenement[]): void {
     for (const evenement of liste) {
-      this.evenementService.monInscription(evenement.id).subscribe((inscription) => {
-        this.inscriptions.set({ ...this.inscriptions(), [evenement.id]: inscription });
-      });
+      this.requetesEvenements.add(this.evenementService.monInscription(evenement.id).subscribe({
+        next: (inscription) => this.inscriptions.update((statuts) => ({ ...statuts, [evenement.id]: inscription })),
+        error: () => this.inscriptions.update((statuts) => ({ ...statuts, [evenement.id]: null })),
+      }));
     }
   }
 

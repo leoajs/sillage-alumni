@@ -25,6 +25,7 @@ describe('CarteEvenement', () => {
   it("prévient le parent avec l'identifiant quand on clique sur S'inscrire", async () => {
     const fixture = TestBed.createComponent(CarteEvenement);
     fixture.componentRef.setInput('evenement', evenement);
+    fixture.componentRef.setInput('inscription', { statut: null, rang: null });
     await fixture.whenStable();
 
     let idRecu: number | null = null;
@@ -32,6 +33,16 @@ describe('CarteEvenement', () => {
     (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.bouton-plein')!.click();
 
     expect(idRecu).toBe(7);
+  });
+
+  it("attend le statut avant de proposer une action d'inscription", async () => {
+    const fixture = TestBed.createComponent(CarteEvenement);
+    fixture.componentRef.setInput('evenement', evenement);
+    await fixture.whenStable();
+
+    const carte = fixture.nativeElement as HTMLElement;
+    expect(carte.querySelector('.actions button')).toBeNull();
+    expect(carte.textContent).toContain('Chargement de ton inscription');
   });
 
   it('affiche la position dans la file d’attente', async () => {
