@@ -32,6 +32,9 @@
             </li>
           }
         </ul>
+        <a class="lien-texte lien-annuaire" routerLink="/annuaire" [queryParams]="{ ville: ville }">
+          Voir les membres à {{ ville }}
+        </a>
       </div>
     }
   </section>

@@ -8,7 +8,7 @@
         [ngModel]="recherche()"
         (ngModelChange)="recherche.set($event)"
       />
-      <select class="champ-select" [ngModel]="villeChoisie()" (ngModelChange)="villeChoisie.set($event)">
+      <select class="champ-select" aria-label="Filtrer par ville" [ngModel]="villeChoisie()" (ngModelChange)="changerVille($event)">
         <option value="">Toutes les villes</option>
         @for (ville of villes(); track ville) {
           <option [value]="ville">{{ ville }}</option>

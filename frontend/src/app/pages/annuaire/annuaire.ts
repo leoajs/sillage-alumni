@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { forkJoin, Subscription } from 'rxjs';
 import { Avatar } from '../../composants/avatar/avatar';
 import { Experience, Formation, Utilisateur } from '../../modeles/utilisateur';
-import { initiales, messageErreur, teinteAvatar } from '../../outils/format';
+import { initiales, messageErreur, normaliserVille, teinteAvatar } from '../../outils/format';
 import { SessionService } from '../../services/session.service';
 import { UtilisateurService } from '../../services/utilisateur.service';
 
@@ -38,19 +38,25 @@ export class Annuaire implements OnInit, OnDestroy {
 
   // Les villes proposées dans le filtre, sans doublon et triées
   villes = computed(() => {
-    const toutes = this.membres()
-      .map((membre) => membre.ville)
-      .filter((ville): ville is string => !!ville);
-    return [...new Set(toutes)].sort();
+    const villes = new Map<string, string>();
+    for (const membre of this.membres()) {
+      const ville = membre.ville?.trim();
+      if (ville) {
+        const cle = normaliserVille(ville);
+        if (!villes.has(cle)) villes.set(cle, ville);
+      }
+    }
+    return [...villes.values()].sort((a, b) => a.localeCompare(b, 'fr'));
   });
 
   // Recherche par nom ou ville, faite dans le navigateur
   membresAffiches = computed(() => {
     const texte = this.recherche().trim().toLowerCase();
-    const ville = this.villeChoisie();
+    const ville = normaliserVille(this.villeChoisie());
     return this.membres().filter((membre) => {
       const nomComplet = `${membre.prenom} ${membre.nom} ${membre.ville ?? ''}`.toLowerCase();
-      return (!texte || nomComplet.includes(texte)) && (!ville || membre.ville === ville);
+      return (!texte || nomComplet.includes(texte))
+        && (!ville || normaliserVille(membre.ville ?? '') === ville);
     });
   });
 
@@ -63,7 +69,12 @@ export class Annuaire implements OnInit, OnDestroy {
       next: (liste) => {
         this.membres.set(liste);
         this.chargement.set(false);
-        const premierProfil = liste.find((membre) => membre.id === this.membreDemande) ?? liste[0];
+        const villeDemandee = normaliserVille(this.route.snapshot.queryParamMap.get('ville') ?? '');
+        const ville = this.villes().find((ville) => normaliserVille(ville) === villeDemandee);
+        this.villeChoisie.set(ville ?? '');
+
+        const profils = this.membresAffiches();
+        const premierProfil = profils.find((membre) => membre.id === this.membreDemande) ?? profils[0];
         if (premierProfil) {
           this.choisir(premierProfil);
         }
@@ -80,14 +91,24 @@ export class Annuaire implements OnInit, OnDestroy {
     this.requeteProfil?.unsubscribe();
   }
 
+  changerVille(ville: string): void {
+    this.villeChoisie.set(ville);
+    const membres = this.membresAffiches();
+    if (!membres.some((membre) => membre.id === this.selection()?.id)) {
+      this.choisir(membres[0] ?? null);
+    }
+  }
+
   // GET /api/users/{id}/experiences et /formations pour le profil sélectionné
-  choisir(membre: Utilisateur): void {
+  choisir(membre: Utilisateur | null): void {
     // Une réponse tardive ne doit pas remplir la fiche du membre suivant.
     this.requeteProfil?.unsubscribe();
     this.selection.set(membre);
     this.experiences.set([]);
     this.formations.set([]);
-    this.chargementProfil.set(true);
+    this.chargementProfil.set(membre !== null);
+    if (!membre) return;
+
     this.requeteProfil = forkJoin({
       experiences: this.utilisateurService.experiences(membre.id),
       formations: this.utilisateurService.formations(membre.id),
