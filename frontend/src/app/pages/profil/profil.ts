@@ -32,6 +32,9 @@ export class Profil implements OnInit {
   experiencesTriees = computed(() =>
     [...this.experiences()].sort((a, b) => b.anneeDebut - a.anneeDebut),
   );
+  posteActuel = computed(() =>
+    this.experiencesTriees().find((experience) => experience.anneeFin === null),
+  );
 
   formulaire = this.fb.nonNullable.group({
     poste: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(150)]],

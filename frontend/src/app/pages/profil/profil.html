@@ -13,6 +13,9 @@
           Voir ma fiche dans l’annuaire
         </a>
       </div>
+      @if (posteActuel(); as poste) {
+        <p class="poste-actuel">{{ poste.poste }} chez {{ poste.entreprise }}</p>
+      }
       <h2>Informations personnelles</h2>
       <dl class="informations">
         <div>

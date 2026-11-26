@@ -28,6 +28,12 @@
   gap: 8px 16px;
 }
 
+.poste-actuel {
+  margin: 6px 0 0;
+  color: var(--texte-doux);
+  overflow-wrap: anywhere;
+}
+
 .informations {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
