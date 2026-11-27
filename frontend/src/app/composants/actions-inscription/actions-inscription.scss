@@ -1,0 +1,50 @@
+:host {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.bouton {
+  white-space: normal;
+}
+
+.etat-vert,
+.etat-ambre,
+.bouton-depart {
+  min-height: 44px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+}
+
+.bouton-depart {
+  border-color: var(--bordure);
+  color: var(--texte-doux);
+  font-weight: 500;
+
+  &:hover:not(:disabled),
+  &:focus-visible:not(:disabled) {
+    border-color: #dba9a9;
+    background: #fde8e8;
+    color: #a12a2a;
+  }
+}
+
+:host(.pleine-largeur) .bouton {
+  min-height: 44px;
+}
+
+:host(.pleine-largeur) .action-principale {
+  width: 100%;
+}
+
+.confirmation-depart {
+  flex-basis: 100%;
+
+  p {
+    margin: 0 0 8px;
+    color: var(--texte-doux);
+    font-size: 0.9rem;
+  }
+}

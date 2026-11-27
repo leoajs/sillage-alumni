@@ -149,15 +149,6 @@ export class TableauDeBord implements OnInit, OnDestroy {
     }));
   }
 
-  inscrire(evenementId: number): void {
-    this.evenementEnCours.set(evenementId);
-    this.erreurInscription.set('');
-    this.requetesPage.add(this.evenementService.inscrire(evenementId).subscribe({
-      next: () => this.apresChangement(),
-      error: (erreur) => this.echecInscription(erreur),
-    }));
-  }
-
   desinscrire(evenementId: number): void {
     this.evenementEnCours.set(evenementId);
     this.erreurInscription.set('');

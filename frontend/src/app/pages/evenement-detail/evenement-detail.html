@@ -23,24 +23,29 @@
     <div class="contenu-fiche">
       <section class="carte participation" aria-labelledby="titre-participation">
         <h3 id="titre-participation">Participation</h3>
+        <dl class="resume-participation">
+          <div>
+            <dt>Inscrits</dt>
+            <dd>
+              {{ fiche.nombreInscrits }}
+              @if (fiche.capaciteMax !== null) {
+                <span>sur {{ fiche.capaciteMax }}</span>
+              }
+            </dd>
+          </div>
+          @if (!inscriptionsFermees(fiche)) {
+            <div>
+              <dt>Places restantes</dt>
+              <dd>{{ fiche.capaciteMax === null ? 'Illimitées' : fiche.placesRestantes }}</dd>
+            </div>
+          }
+        </dl>
 
         @if (fiche.statut === 'ANNULE') {
           <p class="etat-vide">Événement annulé.</p>
         } @else if (inscriptionsFermees(fiche)) {
           <p class="etat-vide">Inscriptions fermées.</p>
         } @else {
-          <p class="disponibilite">
-            @if (fiche.capaciteMax === null) {
-              Places illimitées
-            } @else if (fiche.complet) {
-              Événement complet
-            } @else if (fiche.placesRestantes === 1) {
-              1 place restante
-            } @else {
-              {{ fiche.placesRestantes }} places restantes
-            }
-          </p>
-
           @if (erreurAction()) {
             <p class="message-erreur" role="alert">{{ erreurAction() }}</p>
           }
@@ -55,57 +60,14 @@
             <p class="message-erreur" role="alert">{{ erreurInscription() }}</p>
             <button class="bouton bouton-discret" type="button" (click)="chargerInscription()">Réessayer</button>
           } @else if (inscription(); as moi) {
-            @if (moi.statut === 'INSCRIT' || moi.statut === 'EN_ATTENTE') {
-              <p class="statut" aria-live="polite">
-                @if (moi.statut === 'INSCRIT') {
-                  <span class="etat etat-vert">Inscrit ✓</span>
-                } @else {
-                  <span class="etat etat-ambre">
-                    En attente@if (moi.rang !== null) { · position {{ moi.rang }}}
-                  </span>
-                }
-              </p>
-              @if (confirmationDepart()) {
-                <p class="confirmation" id="confirmation-depart" role="status">
-                  {{ moi.statut === 'INSCRIT' ? 'Ta place sera libérée.' : 'Tu perdras ta position dans la file.' }}
-                </p>
-              }
-              <div class="actions-participation">
-                <button
-                  class="bouton bouton-discret"
-                  [class.bouton-depart]="!confirmationDepart()"
-                  type="button"
-                  [attr.aria-expanded]="confirmationDepart()"
-                  (click)="confirmationDepart.set(!confirmationDepart())"
-                >
-                  @if (confirmationDepart()) {
-                    Annuler
-                  } @else {
-                    {{ moi.statut === 'INSCRIT' ? 'Se désinscrire' : 'Quitter la file' }}
-                  }
-                </button>
-                @if (confirmationDepart()) {
-                  <button
-                    class="bouton bouton-plein"
-                    type="button"
-                    aria-describedby="confirmation-depart"
-                    (click)="desinscrire()"
-                  >
-                    Confirmer
-                  </button>
-                }
-              </div>
-            } @else {
-              <button
-                class="bouton action-principale"
-                [class.bouton-plein]="!fiche.complet"
-                [class.bouton-ambre]="fiche.complet"
-                type="button"
-                (click)="inscrire()"
-              >
-                {{ fiche.complet ? 'Rejoindre la liste d’attente' : 'S’inscrire' }}
-              </button>
-            }
+            <app-actions-inscription
+              class="pleine-largeur"
+              [inscription]="moi"
+              [complet]="fiche.complet"
+              [autoriserInscription]="true"
+              (inscrire)="inscrire()"
+              (desinscrire)="desinscrire()"
+            />
           }
         }
       </section>

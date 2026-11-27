@@ -1,14 +1,15 @@
 import { DatePipe } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { ActionsInscription } from '../actions-inscription/actions-inscription';
 import { teinteCategorie } from '../../modeles/categories';
 import { Evenement, MonInscription } from '../../modeles/evenement';
 
 // Carte d'un événement. Le parent fournit l'événement et l'inscription de l'utilisateur connecté,
-// la carte prévient le parent quand on clique sur "S'inscrire" ou "Se désinscrire".
+// la carte prévient le parent après une désinscription confirmée.
 @Component({
   selector: 'app-carte-evenement',
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, RouterLink, ActionsInscription],
   templateUrl: './carte-evenement.html',
   styleUrl: './carte-evenement.scss',
 })
@@ -20,7 +21,6 @@ export class CarteEvenement {
   @Input() enCours = false; // une requête d'inscription est en cours pour cet événement
   @Input() compact = false; // version courte pour le tableau de bord
 
-  @Output() inscrire = new EventEmitter<number>();
   @Output() desinscrire = new EventEmitter<number>();
 
   get teinte(): string {

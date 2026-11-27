@@ -74,7 +74,6 @@
               [inscription]="inscriptions()[evenement.id]"
               [enCours]="evenementEnCours() === evenement.id"
               [compact]="true"
-              (inscrire)="inscrire($event)"
               (desinscrire)="desinscrire($event)"
             />
           }

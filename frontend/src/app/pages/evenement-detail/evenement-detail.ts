@@ -3,6 +3,7 @@ import { Component, DestroyRef, OnDestroy, OnInit, inject, signal } from '@angul
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
+import { ActionsInscription } from '../../composants/actions-inscription/actions-inscription';
 import { teinteCategorie } from '../../modeles/categories';
 import { Evenement, MonInscription } from '../../modeles/evenement';
 import { messageErreur } from '../../outils/format';
@@ -10,7 +11,7 @@ import { EvenementService } from '../../services/evenement.service';
 
 @Component({
   selector: 'app-evenement-detail',
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, RouterLink, ActionsInscription],
   templateUrl: './evenement-detail.html',
   styleUrl: './evenement-detail.scss',
 })
@@ -30,7 +31,6 @@ export class EvenementDetail implements OnInit, OnDestroy {
   erreurInscription = signal('');
   envoiEnCours = signal(false);
   erreurAction = signal('');
-  confirmationDepart = signal(false);
   teinteCategorie = teinteCategorie;
 
   ngOnInit(): void {
@@ -86,7 +86,6 @@ export class EvenementDetail implements OnInit, OnDestroy {
     this.erreurInscription.set('');
     this.erreurAction.set('');
     this.envoiEnCours.set(false);
-    this.confirmationDepart.set(false);
     this.chargement.set(true);
 
     if (!Number.isSafeInteger(id) || id <= 0 || id > 2147483647) {
@@ -128,7 +127,6 @@ export class EvenementDetail implements OnInit, OnDestroy {
 
     this.envoiEnCours.set(true);
     this.erreurAction.set('');
-    this.confirmationDepart.set(false);
     this.requetes.add(requete.subscribe({
       next: (inscription) => {
         if (inscription) {

@@ -41,28 +41,17 @@
     }
 
     <div class="actions">
-      @if (inscription === undefined) {
-        <span class="etat">Chargement de ton inscription…</span>
-      } @else if (inscription === null) {
-        <span class="etat">Statut d'inscription indisponible.</span>
-      } @else if (statut === 'INSCRIT') {
-        <span class="etat etat-vert">Inscrit ✓</span>
-        <button class="lien-texte lien-danger" type="button" [disabled]="enCours" (click)="desinscrire.emit(evenement.id)">
-          Se désinscrire
-        </button>
-      } @else if (statut === 'EN_ATTENTE') {
-        <span class="etat etat-ambre">En attente · position {{ inscription?.rang }}</span>
-        <button class="lien-texte lien-danger" type="button" [disabled]="enCours" (click)="desinscrire.emit(evenement.id)">
-          Quitter la file
-        </button>
-      } @else if (evenement.complet) {
-        <button class="bouton bouton-ambre" type="button" [disabled]="enCours" (click)="inscrire.emit(evenement.id)">
-          Rejoindre la liste d'attente
-        </button>
-      } @else {
-        <button class="bouton bouton-plein" type="button" [disabled]="enCours" (click)="inscrire.emit(evenement.id)">
-          S'inscrire
-        </button>
+      @if (!inscription || participe) {
+        <app-actions-inscription
+          [inscription]="inscription"
+          [enCours]="enCours"
+          (desinscrire)="desinscrire.emit(evenement.id)"
+        />
+      }
+
+      @if (!participe) {
+        <a class="bouton bouton-plein" [routerLink]="['/evenements', evenement.id]"
+          [attr.aria-label]="'Voir l’événement ' + evenement.titre">Voir l’événement</a>
       }
 
       @if (compact && inscription && evenement.capaciteMax !== null && !participe) {

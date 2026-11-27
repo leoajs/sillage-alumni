@@ -1,0 +1,42 @@
+@if (inscription === undefined) {
+  <span class="etat">Chargement de ton inscription…</span>
+} @else if (inscription === null) {
+  <span class="etat">Statut d'inscription indisponible.</span>
+} @else if (participe) {
+  @if (statut === 'INSCRIT') {
+    <span class="etat etat-vert">Inscrit ✓</span>
+  } @else {
+    <span class="etat etat-ambre">En attente@if (inscription?.rang != null) { · position {{ inscription?.rang }}}</span>
+  }
+  <button
+    class="bouton"
+    [class.bouton-doux]="confirmationDepart()"
+    [class.bouton-discret]="!confirmationDepart()"
+    [class.bouton-depart]="!confirmationDepart()"
+    type="button"
+    [disabled]="enCours"
+    [attr.aria-expanded]="confirmationDepart()"
+    (click)="confirmationDepart.set(!confirmationDepart())"
+  >
+    {{ confirmationDepart() ? 'Annuler' : statut === 'INSCRIT' ? 'Se désinscrire' : 'Quitter la file' }}
+  </button>
+  @if (confirmationDepart()) {
+    <div class="confirmation-depart">
+      <p role="status">{{ statut === 'INSCRIT' ? 'Confirmer la désinscription ?' : 'Perdre ta position dans la file ?' }}</p>
+      <button class="bouton bouton-plein" type="button" [disabled]="enCours" (click)="confirmerDepart()">
+        Confirmer
+      </button>
+    </div>
+  }
+} @else if (autoriserInscription) {
+  <button
+    class="bouton action-principale"
+    [class.bouton-ambre]="complet"
+    [class.bouton-plein]="!complet"
+    type="button"
+    [disabled]="enCours"
+    (click)="inscrire.emit()"
+  >
+    {{ complet ? 'Rejoindre la liste d’attente' : 'S’inscrire' }}
+  </button>
+}
