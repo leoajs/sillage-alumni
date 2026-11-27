@@ -7,7 +7,7 @@ import { CarteFrance, VilleMembres } from '../../composants/carte-france/carte-f
 import { Evenement, MonInscription } from '../../modeles/evenement';
 import { Sujet } from '../../modeles/forum';
 import { Utilisateur } from '../../modeles/utilisateur';
-import { ilYa, initiales, messageErreur, normaliserVille, teinteAvatar } from '../../outils/format';
+import { datePublication, initiales, messageErreur, normaliserVille, teinteAvatar } from '../../outils/format';
 import { EvenementService } from '../../services/evenement.service';
 import { ForumService } from '../../services/forum.service';
 import { SessionService } from '../../services/session.service';
@@ -66,7 +66,7 @@ export class TableauDeBord implements OnInit, OnDestroy {
   chargementForum = signal(true);
   erreurForum = signal('');
 
-  ilYa = ilYa;
+  datePublication = datePublication;
   initiales = initiales;
   teinteAvatar = teinteAvatar;
 

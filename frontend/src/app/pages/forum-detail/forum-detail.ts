@@ -6,7 +6,7 @@ import { Subscription } from 'rxjs';
 import { Avatar } from '../../composants/avatar/avatar';
 import { teinteCategorie } from '../../modeles/categories';
 import { Commentaire, Sujet } from '../../modeles/forum';
-import { ilYa, initiales, initialesDepuisNom, messageErreur, teinteAvatar } from '../../outils/format';
+import { datePublication, initiales, initialesDepuisNom, messageErreur, teinteAvatar } from '../../outils/format';
 import { ForumService } from '../../services/forum.service';
 import { SessionService } from '../../services/session.service';
 
@@ -39,7 +39,7 @@ export class ForumDetail implements OnInit, OnDestroy {
   initiales = initiales;
   initialesDepuisNom = initialesDepuisNom;
   teinteAvatar = teinteAvatar;
-  ilYa = ilYa;
+  datePublication = datePublication;
 
   private sujetId = 0;
   private requetesSujet = new Subscription();

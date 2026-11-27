@@ -98,7 +98,7 @@
           @for (sujet of sujets(); track sujet.id) {
             <a class="sujet" [routerLink]="['/forum', sujet.id]">
               <strong>{{ sujet.titre }}</strong>
-              <span class="meta">Par {{ sujet.auteurNom }} · {{ ilYa(sujet.createdAt) }}</span>
+              <span class="meta">Par {{ sujet.auteurNom }} · {{ datePublication(sujet.createdAt) }}</span>
               <span class="extrait">« {{ sujet.description }} »</span>
               <span class="meta">
                 ♥ {{ sujet.nombreLikes }}

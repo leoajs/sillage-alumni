@@ -13,7 +13,7 @@
       <app-avatar [initiales]="initialesDepuisNom(sujet.auteurNom)" [teinte]="teinteAvatar(sujet.auteurId)" />
       <div>
         <p class="nom">{{ sujet.auteurNom }}</p>
-        <p class="quand">Publié {{ ilYa(sujet.createdAt) }}</p>
+        <p class="quand">{{ datePublication(sujet.createdAt) }}</p>
       </div>
       <span class="badge teinte-{{ teinte() }}">{{ sujet.categorieLibelle }}</span>
     </header>
@@ -43,7 +43,7 @@
           <div class="commentaire-corps">
             <p class="commentaire-entete">
               <strong>{{ commentaire.auteurPrenom }} {{ commentaire.auteurNom }}</strong>
-              <span class="quand">{{ ilYa(commentaire.createdAt) }}</span>
+              <span class="quand">{{ datePublication(commentaire.createdAt) }}</span>
               @if (peutSupprimer(commentaire)) {
                 <button class="lien-texte lien-danger" type="button" (click)="supprimer(commentaire)">Supprimer</button>
               }
