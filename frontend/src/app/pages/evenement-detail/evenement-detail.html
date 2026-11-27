@@ -66,18 +66,35 @@
                 }
               </p>
               @if (confirmationDepart()) {
-                <div class="confirmation">
-                  <p>{{ moi.statut === 'INSCRIT' ? 'Ta place sera libérée.' : 'Tu perdras ta position dans la file.' }}</p>
-                  <div class="actions-participation">
-                    <button class="bouton bouton-discret" type="button" (click)="confirmationDepart.set(false)">Annuler</button>
-                    <button class="bouton bouton-plein" type="button" (click)="desinscrire()">Confirmer</button>
-                  </div>
-                </div>
-              } @else {
-                <button class="bouton bouton-discret" type="button" (click)="confirmationDepart.set(true)">
-                  {{ moi.statut === 'INSCRIT' ? 'Se désinscrire' : 'Quitter la file' }}
-                </button>
+                <p class="confirmation" id="confirmation-depart" role="status">
+                  {{ moi.statut === 'INSCRIT' ? 'Ta place sera libérée.' : 'Tu perdras ta position dans la file.' }}
+                </p>
               }
+              <div class="actions-participation">
+                <button
+                  class="bouton bouton-discret"
+                  [class.bouton-depart]="!confirmationDepart()"
+                  type="button"
+                  [attr.aria-expanded]="confirmationDepart()"
+                  (click)="confirmationDepart.set(!confirmationDepart())"
+                >
+                  @if (confirmationDepart()) {
+                    Annuler
+                  } @else {
+                    {{ moi.statut === 'INSCRIT' ? 'Se désinscrire' : 'Quitter la file' }}
+                  }
+                </button>
+                @if (confirmationDepart()) {
+                  <button
+                    class="bouton bouton-plein"
+                    type="button"
+                    aria-describedby="confirmation-depart"
+                    (click)="desinscrire()"
+                  >
+                    Confirmer
+                  </button>
+                }
+              </div>
             } @else {
               <button
                 class="bouton action-principale"
@@ -101,6 +118,11 @@
     </div>
   } @else if (chargement()) {
     <p class="carte etat-vide" role="status">Chargement de l’événement…</p>
+  } @else if (introuvable()) {
+    <section class="carte erreur-fiche" role="status">
+      <h2>Événement introuvable</h2>
+      <p>Le lien peut être incorrect ou l’événement avoir été retiré.</p>
+    </section>
   } @else {
     <section class="carte erreur-fiche">
       <p class="message-erreur" role="alert">{{ erreur() }}</p>

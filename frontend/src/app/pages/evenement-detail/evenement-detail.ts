@@ -24,6 +24,7 @@ export class EvenementDetail implements OnInit, OnDestroy {
   evenement = signal<Evenement | null>(null);
   chargement = signal(true);
   erreur = signal('');
+  introuvable = signal(false);
   inscription = signal<MonInscription | null>(null);
   chargementInscription = signal(true);
   erreurInscription = signal('');
@@ -81,6 +82,7 @@ export class EvenementDetail implements OnInit, OnDestroy {
     this.evenement.set(null);
     this.inscription.set(null);
     this.erreur.set('');
+    this.introuvable.set(false);
     this.erreurInscription.set('');
     this.erreurAction.set('');
     this.envoiEnCours.set(false);
@@ -88,7 +90,7 @@ export class EvenementDetail implements OnInit, OnDestroy {
     this.chargement.set(true);
 
     if (!Number.isSafeInteger(id) || id <= 0 || id > 2147483647) {
-      this.erreur.set('Cet événement est introuvable.');
+      this.introuvable.set(true);
       this.chargement.set(false);
       return;
     }
@@ -109,7 +111,12 @@ export class EvenementDetail implements OnInit, OnDestroy {
         }
       },
       error: (erreur) => {
-        this.erreur.set(messageErreur(erreur, 'Impossible de charger cet événement.'));
+        if (erreur.status === 404) {
+          this.evenement.set(null);
+          this.introuvable.set(true);
+        } else {
+          this.erreur.set(messageErreur(erreur, 'Impossible de charger cet événement.'));
+        }
         this.chargement.set(false);
       },
     }));
@@ -124,7 +131,12 @@ export class EvenementDetail implements OnInit, OnDestroy {
     this.confirmationDepart.set(false);
     this.requetes.add(requete.subscribe({
       next: (inscription) => {
-        this.inscription.set(inscription ?? { statut: 'DESINSCRIT', rang: null });
+        if (inscription) {
+          this.inscription.set(inscription);
+        } else {
+          // La désinscription renvoie 204. On relit le statut côté Spring.
+          this.chargerInscription();
+        }
         this.envoiEnCours.set(false);
         this.chargerDetail();
       },

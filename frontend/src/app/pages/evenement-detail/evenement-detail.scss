@@ -21,16 +21,32 @@
   }
 }
 
-.accent-vert { --fond-teinte: var(--vert-fond); }
-.accent-violet { --fond-teinte: var(--violet-fond); }
-.accent-ambre { --fond-teinte: var(--ambre-fond); }
-.accent-gris { --fond-teinte: var(--fond); }
+.accent-vert {
+  --fond-teinte: var(--vert-fond);
+}
+
+.accent-violet {
+  --fond-teinte: var(--violet-fond);
+}
+
+.accent-ambre {
+  --fond-teinte: var(--ambre-fond);
+}
+
+.accent-gris {
+  --fond-teinte: var(--fond);
+}
 
 .infos-pratiques {
   display: flex;
   flex-wrap: wrap;
   gap: 14px 34px;
   margin: 0;
+
+  > div {
+    min-width: 0;
+    max-width: 100%;
+  }
 
   dt,
   .adresse {
@@ -77,6 +93,7 @@
 .disponibilite {
   margin: 8px 0 14px;
   color: var(--texte-doux);
+  font-variant-numeric: tabular-nums;
 }
 
 .statut {
@@ -87,7 +104,16 @@
   width: 100%;
 }
 
-.confirmation p {
+.bouton-depart {
+  border-color: #dba9a9;
+  color: #a12a2a;
+
+  &:hover {
+    background: #fde8e8;
+  }
+}
+
+.confirmation {
   margin: 0 0 10px;
   color: var(--texte-doux);
   font-size: 0.9rem;
@@ -112,7 +138,19 @@
   overflow-wrap: anywhere;
 }
 
-@media (max-width: 860px) {
+.erreur-fiche {
+  h2 {
+    margin: 0 0 8px;
+    font-size: 1.2rem;
+  }
+
+  p:not(.message-erreur) {
+    margin: 0;
+    color: var(--texte-doux);
+  }
+}
+
+@media (max-width: 920px) {
   .contenu-fiche {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
