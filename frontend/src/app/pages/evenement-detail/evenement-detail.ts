@@ -2,9 +2,9 @@ import { DatePipe } from '@angular/common';
 import { Component, DestroyRef, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { teinteCategorie } from '../../modeles/categories';
-import { Evenement } from '../../modeles/evenement';
+import { Evenement, MonInscription } from '../../modeles/evenement';
 import { messageErreur } from '../../outils/format';
 import { EvenementService } from '../../services/evenement.service';
 
@@ -24,6 +24,12 @@ export class EvenementDetail implements OnInit, OnDestroy {
   evenement = signal<Evenement | null>(null);
   chargement = signal(true);
   erreur = signal('');
+  inscription = signal<MonInscription | null>(null);
+  chargementInscription = signal(true);
+  erreurInscription = signal('');
+  envoiEnCours = signal(false);
+  erreurAction = signal('');
+  confirmationDepart = signal(false);
   teinteCategorie = teinteCategorie;
 
   ngOnInit(): void {
@@ -40,12 +46,45 @@ export class EvenementDetail implements OnInit, OnDestroy {
     this.charger(this.id);
   }
 
+  inscriptionsFermees(evenement: Evenement): boolean {
+    return evenement.statut !== 'PUBLIE'
+      || new Date(evenement.dateEvenement).getTime() <= Date.now();
+  }
+
+  chargerInscription(): void {
+    this.chargementInscription.set(true);
+    this.erreurInscription.set('');
+    this.requetes.add(this.evenementService.monInscription(this.id).subscribe({
+      next: (inscription) => {
+        this.inscription.set(inscription);
+        this.chargementInscription.set(false);
+      },
+      error: (erreur) => {
+        this.erreurInscription.set(messageErreur(erreur, 'Impossible de charger ton statut.'));
+        this.chargementInscription.set(false);
+      },
+    }));
+  }
+
+  inscrire(): void {
+    this.modifierInscription(this.evenementService.inscrire(this.id));
+  }
+
+  desinscrire(): void {
+    this.modifierInscription(this.evenementService.desinscrire(this.id));
+  }
+
   private charger(id: number): void {
     this.requetes.unsubscribe();
     this.requetes = new Subscription();
     this.id = id;
     this.evenement.set(null);
+    this.inscription.set(null);
     this.erreur.set('');
+    this.erreurInscription.set('');
+    this.erreurAction.set('');
+    this.envoiEnCours.set(false);
+    this.confirmationDepart.set(false);
     this.chargement.set(true);
 
     if (!Number.isSafeInteger(id) || id <= 0 || id > 2147483647) {
@@ -54,14 +93,44 @@ export class EvenementDetail implements OnInit, OnDestroy {
       return;
     }
 
-    this.requetes.add(this.evenementService.detail(id).subscribe({
+    this.chargerDetail();
+  }
+
+  private chargerDetail(): void {
+    const premiereLecture = this.evenement() === null;
+    this.chargement.set(true);
+    this.erreur.set('');
+    this.requetes.add(this.evenementService.detail(this.id).subscribe({
       next: (evenement) => {
         this.evenement.set(evenement);
         this.chargement.set(false);
+        if (premiereLecture && !this.inscriptionsFermees(evenement)) {
+          this.chargerInscription();
+        }
       },
       error: (erreur) => {
         this.erreur.set(messageErreur(erreur, 'Impossible de charger cet événement.'));
         this.chargement.set(false);
+      },
+    }));
+  }
+
+  private modifierInscription(requete: Observable<MonInscription | void>): void {
+    const evenement = this.evenement();
+    if (!evenement || this.inscriptionsFermees(evenement) || this.envoiEnCours() || this.chargement()) return;
+
+    this.envoiEnCours.set(true);
+    this.erreurAction.set('');
+    this.confirmationDepart.set(false);
+    this.requetes.add(requete.subscribe({
+      next: (inscription) => {
+        this.inscription.set(inscription ?? { statut: 'DESINSCRIT', rang: null });
+        this.envoiEnCours.set(false);
+        this.chargerDetail();
+      },
+      error: (erreur) => {
+        this.erreurAction.set(messageErreur(erreur, 'Impossible de modifier ta participation.'));
+        this.envoiEnCours.set(false);
       },
     }));
   }

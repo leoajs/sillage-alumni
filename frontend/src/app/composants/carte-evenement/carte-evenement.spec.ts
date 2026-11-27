@@ -9,6 +9,7 @@ const evenement: Evenement = {
   description: '',
   categorieId: 1,
   categorieLibelle: 'Soirée',
+  statut: 'PUBLIE',
   auteurId: 2,
   auteurNom: 'Léa Martin',
   dateEvenement: '2026-12-18T19:00:00',
