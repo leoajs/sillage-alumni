@@ -4,6 +4,7 @@ import { connecteGuard, inviteGuard } from './gardes/connecte.guard';
 import { Accueil } from './pages/accueil/accueil';
 import { Annuaire } from './pages/annuaire/annuaire';
 import { Connexion } from './pages/connexion/connexion';
+import { EvenementDetail } from './pages/evenement-detail/evenement-detail';
 import { EvenementNouveau } from './pages/evenement-nouveau/evenement-nouveau';
 import { Evenements } from './pages/evenements/evenements';
 import { ForumDetail } from './pages/forum-detail/forum-detail';
@@ -28,6 +29,7 @@ export const routes: Routes = [
       { path: 'tableau-de-bord', component: TableauDeBord, data: { titre: 'Tableau de bord' } },
       { path: 'evenements', component: Evenements, data: { titre: 'Espace événements' } },
       { path: 'evenements/nouveau', component: EvenementNouveau, data: { titre: 'Créer un événement' } },
+      { path: 'evenements/:id', component: EvenementDetail, data: { titre: 'Événement' } },
       { path: 'annuaire', component: Annuaire, data: { titre: 'Annuaire des alumni' } },
       { path: 'profil', component: Profil, data: { titre: 'Mon profil' } },
       { path: 'forum', component: Forum, data: { titre: 'Forum & discussions' } },

@@ -9,7 +9,9 @@
   }
 
   <div class="corps">
-    <h3 class="titre">{{ evenement.titre }}</h3>
+    <h3 class="titre">
+      <a [routerLink]="['/evenements', evenement.id]">{{ evenement.titre }} <span aria-hidden="true">›</span></a>
+    </h3>
     <p class="info">
       <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>
       {{ evenement.dateEvenement | date: "EEE d MMM y '·' HH'h'mm" }}

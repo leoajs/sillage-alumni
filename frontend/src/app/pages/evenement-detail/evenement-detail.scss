@@ -1,0 +1,67 @@
+.fiche-evenement {
+  max-width: 1120px;
+}
+
+.retour {
+  display: inline-block;
+  margin-bottom: 16px;
+}
+
+.entete-evenement {
+  padding: 26px clamp(20px, 4vw, 36px);
+  background: linear-gradient(135deg, var(--fond-teinte, var(--bleu-fond)), var(--carte) 82%);
+  color: var(--encre);
+
+  h2 {
+    margin: 10px 0 22px;
+    font-size: clamp(1.6rem, 4vw, 2.65rem);
+    line-height: 1.12;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+}
+
+.accent-vert { --fond-teinte: var(--vert-fond); }
+.accent-violet { --fond-teinte: var(--violet-fond); }
+.accent-ambre { --fond-teinte: var(--ambre-fond); }
+.accent-gris { --fond-teinte: var(--fond); }
+
+.infos-pratiques {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 34px;
+  margin: 0;
+
+  dt,
+  .adresse {
+    color: var(--texte-doux);
+    font-size: 0.88rem;
+  }
+
+  dd {
+    margin: 3px 0 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+.description {
+  margin-top: 18px;
+
+  h3 {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+}
+
+.organisateur {
+  margin: 6px 0 16px;
+  color: var(--texte-doux);
+  font-size: 0.9rem;
+}
+
+.contenu-description {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}

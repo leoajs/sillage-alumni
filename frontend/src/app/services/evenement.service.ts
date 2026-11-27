@@ -16,6 +16,10 @@ export class EvenementService {
     return this.http.get<Evenement[]>('/api/events', { params });
   }
 
+  detail(id: number): Observable<Evenement> {
+    return this.http.get<Evenement>(`/api/events/${id}`);
+  }
+
   // POST /api/events : réservé aux organisateurs et aux admins
   creer(evenement: NouvelEvenement): Observable<Evenement> {
     return this.http.post<Evenement>('/api/events', evenement);

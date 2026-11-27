@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { Evenement } from '../../modeles/evenement';
 import { CarteEvenement } from './carte-evenement';
 
@@ -22,6 +23,8 @@ const evenement: Evenement = {
 };
 
 describe('CarteEvenement', () => {
+  beforeEach(() => TestBed.configureTestingModule({ providers: [provideRouter([])] }));
+
   it("prévient le parent avec l'identifiant quand on clique sur S'inscrire", async () => {
     const fixture = TestBed.createComponent(CarteEvenement);
     fixture.componentRef.setInput('evenement', evenement);

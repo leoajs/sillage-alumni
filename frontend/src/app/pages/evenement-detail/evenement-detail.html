@@ -1,0 +1,36 @@
+<div class="fiche-evenement">
+  <a class="lien-texte retour" routerLink="/evenements">← Retour aux événements</a>
+
+  @if (evenement(); as fiche) {
+    <header class="carte entete-evenement accent-{{ teinteCategorie(fiche.categorieId) }}">
+      <span class="badge teinte-{{ teinteCategorie(fiche.categorieId) }}">{{ fiche.categorieLibelle }}</span>
+      <h2>{{ fiche.titre }}</h2>
+      <dl class="infos-pratiques">
+        <div>
+          <dt>Date et heure</dt>
+          <dd>{{ fiche.dateEvenement | date: "EEEE d MMMM y 'à' HH'h'mm" }}</dd>
+        </div>
+        <div>
+          <dt>Lieu</dt>
+          <dd>{{ fiche.lieu }}</dd>
+          @if (fiche.adresse && fiche.adresse !== fiche.lieu) {
+            <dd class="adresse">{{ fiche.adresse }}</dd>
+          }
+        </div>
+      </dl>
+    </header>
+
+    <section class="carte description">
+      <h3>À propos de l’événement</h3>
+      <p class="organisateur">Organisé par {{ fiche.auteurNom }}</p>
+      <p class="contenu-description">{{ fiche.description }}</p>
+    </section>
+  } @else if (chargement()) {
+    <p class="carte etat-vide" role="status">Chargement de l’événement…</p>
+  } @else {
+    <section class="carte erreur-fiche">
+      <p class="message-erreur" role="alert">{{ erreur() }}</p>
+      <button class="bouton bouton-discret" type="button" (click)="reessayer()">Réessayer</button>
+    </section>
+  }
+</div>

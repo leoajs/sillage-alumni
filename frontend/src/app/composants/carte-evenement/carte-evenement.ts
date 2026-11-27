@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { teinteCategorie } from '../../modeles/categories';
 import { Evenement, MonInscription } from '../../modeles/evenement';
 
@@ -7,7 +8,7 @@ import { Evenement, MonInscription } from '../../modeles/evenement';
 // la carte prévient le parent quand on clique sur "S'inscrire" ou "Se désinscrire".
 @Component({
   selector: 'app-carte-evenement',
-  imports: [DatePipe],
+  imports: [DatePipe, RouterLink],
   templateUrl: './carte-evenement.html',
   styleUrl: './carte-evenement.scss',
 })
