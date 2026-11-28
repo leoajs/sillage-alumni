@@ -74,14 +74,6 @@ export class Evenements implements OnInit, OnDestroy {
     return evenement.auteurId === this.session.utilisateur()?.userId;
   }
 
-  inscrire(evenementId: number): void {
-    this.evenementEnCours.set(evenementId);
-    this.evenementService.inscrire(evenementId).subscribe({
-      next: () => this.apresChangement(),
-      error: (erreur) => this.echec(erreur),
-    });
-  }
-
   desinscrire(evenementId: number): void {
     this.evenementEnCours.set(evenementId);
     this.evenementService.desinscrire(evenementId).subscribe({

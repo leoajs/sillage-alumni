@@ -16,16 +16,19 @@ export function teinteAvatar(id: number): string {
   return TEINTES[id % TEINTES.length];
 }
 
-// "il y a 5 min", "il y a 3 h", "il y a 2 j", puis la date.
-export function ilYa(dateIso: string): string {
-  const minutes = Math.floor((Date.now() - new Date(dateIso).getTime()) / 60000);
-  if (minutes < 1) return "à l'instant";
-  if (minutes < 60) return `il y a ${minutes} min`;
-  const heures = Math.floor(minutes / 60);
-  if (heures < 24) return `il y a ${heures} h`;
-  const jours = Math.floor(heures / 24);
-  if (jours < 7) return `il y a ${jours} j`;
-  return new Date(dateIso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+export function datePublication(dateIso: string): string {
+  const date = new Date(dateIso);
+  if (Number.isNaN(date.getTime())) return '';
+
+  const aujourdhui = new Date();
+  const hier = new Date(aujourdhui);
+  hier.setDate(hier.getDate() - 1);
+
+  const heure = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  if (date.toDateString() === aujourdhui.toDateString()) return `Aujourd’hui à ${heure}`;
+  if (date.toDateString() === hier.toDateString()) return `Hier à ${heure}`;
+  const jour = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }).replace('.', '');
+  return `${jour} à ${heure}`;
 }
 
 // Le backend renvoie ses erreurs au format ErreurDto { message, details }.

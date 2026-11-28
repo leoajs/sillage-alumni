@@ -5,6 +5,7 @@ export interface Evenement {
   description: string;
   categorieId: number;
   categorieLibelle: string;
+  statut: 'PUBLIE' | 'ANNULE' | 'ARCHIVE';
   auteurId: number;
   auteurNom: string;
   dateEvenement: string;
@@ -29,7 +30,8 @@ export interface NouvelEvenement {
   capaciteMax: number | null;
 }
 
-// GET et POST /api/events/{id}/inscriptions/me : statut null = pas inscrit
+// GET /api/events/{id}/inscriptions/me et POST /api/events/{id}/inscriptions
+// statut null = pas inscrit
 export interface MonInscription {
   statut: 'INSCRIT' | 'EN_ATTENTE' | 'DESINSCRIT' | null;
   rang: number | null;

@@ -9,7 +9,9 @@
   }
 
   <div class="corps">
-    <h3 class="titre">{{ evenement.titre }}</h3>
+    <h3 class="titre">
+      <a [routerLink]="['/evenements', evenement.id]">{{ evenement.titre }} <span aria-hidden="true">›</span></a>
+    </h3>
     <p class="info">
       <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>
       {{ evenement.dateEvenement | date: "EEE d MMM y '·' HH'h'mm" }}
@@ -39,28 +41,17 @@
     }
 
     <div class="actions">
-      @if (inscription === undefined) {
-        <span class="etat">Chargement de ton inscription…</span>
-      } @else if (inscription === null) {
-        <span class="etat">Statut d'inscription indisponible.</span>
-      } @else if (statut === 'INSCRIT') {
-        <span class="etat etat-vert">Inscrit ✓</span>
-        <button class="lien-texte lien-danger" type="button" [disabled]="enCours" (click)="desinscrire.emit(evenement.id)">
-          Se désinscrire
-        </button>
-      } @else if (statut === 'EN_ATTENTE') {
-        <span class="etat etat-ambre">En attente · position {{ inscription?.rang }}</span>
-        <button class="lien-texte lien-danger" type="button" [disabled]="enCours" (click)="desinscrire.emit(evenement.id)">
-          Quitter la file
-        </button>
-      } @else if (evenement.complet) {
-        <button class="bouton bouton-ambre" type="button" [disabled]="enCours" (click)="inscrire.emit(evenement.id)">
-          Rejoindre la liste d'attente
-        </button>
-      } @else {
-        <button class="bouton bouton-plein" type="button" [disabled]="enCours" (click)="inscrire.emit(evenement.id)">
-          S'inscrire
-        </button>
+      @if (!inscription || participe) {
+        <app-actions-inscription
+          [inscription]="inscription"
+          [enCours]="enCours"
+          (desinscrire)="desinscrire.emit(evenement.id)"
+        />
+      }
+
+      @if (!participe) {
+        <a class="bouton bouton-plein" [routerLink]="['/evenements', evenement.id]"
+          [attr.aria-label]="'Voir l’événement ' + evenement.titre">Voir l’événement</a>
       }
 
       @if (compact && inscription && evenement.capaciteMax !== null && !participe) {

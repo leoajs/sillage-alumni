@@ -3,7 +3,7 @@
     <app-avatar [initiales]="initiales(sujet.auteurNom)" [teinte]="teinteAvatar(sujet.auteurId)" taille="petit" />
     <div>
       <p class="nom">{{ sujet.auteurNom }}@if (estMonSujet) { <span class="moi">(moi)</span>}</p>
-      <p class="quand">{{ ilYa(sujet.createdAt) }}</p>
+      <p class="quand">{{ datePublication(sujet.createdAt) }}</p>
     </div>
     <span class="badge teinte-{{ teinte }}">{{ sujet.categorieLibelle }}</span>
   </header>

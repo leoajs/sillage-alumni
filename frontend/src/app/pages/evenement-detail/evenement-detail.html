@@ -1,0 +1,94 @@
+<div class="fiche-evenement">
+  <a class="lien-texte retour" routerLink="/evenements">← Retour aux événements</a>
+
+  @if (evenement(); as fiche) {
+    <header class="carte entete-evenement accent-{{ teinteCategorie(fiche.categorieId) }}">
+      <span class="badge teinte-{{ teinteCategorie(fiche.categorieId) }}">{{ fiche.categorieLibelle }}</span>
+      <h2>{{ fiche.titre }}</h2>
+      <dl class="infos-pratiques">
+        <div>
+          <dt>Date et heure</dt>
+          <dd>{{ fiche.dateEvenement | date: "EEEE d MMMM y 'à' HH'h'mm" }}</dd>
+        </div>
+        <div>
+          <dt>Lieu</dt>
+          <dd>{{ fiche.lieu }}</dd>
+          @if (fiche.adresse && fiche.adresse !== fiche.lieu) {
+            <dd class="adresse">{{ fiche.adresse }}</dd>
+          }
+        </div>
+      </dl>
+    </header>
+
+    <div class="contenu-fiche">
+      <section class="carte participation" aria-labelledby="titre-participation">
+        <h3 id="titre-participation">Participation</h3>
+        <dl class="resume-participation">
+          <div>
+            <dt>Inscrits</dt>
+            <dd>
+              {{ fiche.nombreInscrits }}
+              @if (fiche.capaciteMax !== null) {
+                <span>sur {{ fiche.capaciteMax }}</span>
+              }
+            </dd>
+          </div>
+          @if (!inscriptionsFermees(fiche)) {
+            <div>
+              <dt>Places restantes</dt>
+              <dd>{{ fiche.capaciteMax === null ? 'Illimitées' : fiche.placesRestantes }}</dd>
+            </div>
+          }
+        </dl>
+
+        @if (fiche.statut === 'ANNULE') {
+          <p class="etat-vide">Événement annulé.</p>
+        } @else if (inscriptionsFermees(fiche)) {
+          <p class="etat-vide">Inscriptions fermées.</p>
+        } @else {
+          @if (erreurAction()) {
+            <p class="message-erreur" role="alert">{{ erreurAction() }}</p>
+          }
+          @if (envoiEnCours()) {
+            <p class="etat-vide" role="status">Mise à jour de ta participation…</p>
+          } @else if (chargement() || chargementInscription()) {
+            <p class="etat-vide" role="status">Chargement de ta participation…</p>
+          } @else if (erreur()) {
+            <p class="message-erreur" role="alert">{{ erreur() }}</p>
+            <button class="bouton bouton-discret" type="button" (click)="reessayer()">Réessayer</button>
+          } @else if (erreurInscription()) {
+            <p class="message-erreur" role="alert">{{ erreurInscription() }}</p>
+            <button class="bouton bouton-discret" type="button" (click)="chargerInscription()">Réessayer</button>
+          } @else if (inscription(); as moi) {
+            <app-actions-inscription
+              class="pleine-largeur"
+              [inscription]="moi"
+              [complet]="fiche.complet"
+              [autoriserInscription]="true"
+              (inscrire)="inscrire()"
+              (desinscrire)="desinscrire()"
+            />
+          }
+        }
+      </section>
+
+      <section class="carte description">
+        <h3>À propos de l’événement</h3>
+        <p class="organisateur">Organisé par {{ fiche.auteurNom }}</p>
+        <p class="contenu-description">{{ fiche.description }}</p>
+      </section>
+    </div>
+  } @else if (chargement()) {
+    <p class="carte etat-vide" role="status">Chargement de l’événement…</p>
+  } @else if (introuvable()) {
+    <section class="carte erreur-fiche" role="status">
+      <h2>Événement introuvable</h2>
+      <p>Le lien peut être incorrect ou l’événement avoir été retiré.</p>
+    </section>
+  } @else {
+    <section class="carte erreur-fiche">
+      <p class="message-erreur" role="alert">{{ erreur() }}</p>
+      <button class="bouton bouton-discret" type="button" (click)="reessayer()">Réessayer</button>
+    </section>
+  }
+</div>
